@@ -1,10 +1,10 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Ratio Spiders</title>
+<title>Ratio Sunshine</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700;800&display=swap">
 <style>
-/* Layout: one calm column. Question card on top, answer box and keypad underneath, the spider is drawn when help is asked for. */
+/* Layout: one calm column. Question card on top, answer box and keypad underneath, the sun is drawn when help is asked for. */
 :root{
   --font:'Lexend', Verdana, 'Trebuchet MS', system-ui, sans-serif;
   --bg:#FBF6E4; --surface:#FFFFFF; --surface-2:#F3EEDB; --ink:#16213A; --ink-soft:#4E5873; --line:#DED6BC;
@@ -95,21 +95,22 @@ p{margin:0}
 .keypad .wide{grid-column:span 2}
 .keypad .check{background:var(--teal); color:var(--on-accent); border-color:var(--teal); box-shadow:0 3px 0 var(--teal-deep)}
 
-/* spider diagram, drawn the way she draws it: a body with one leg for each part */
-.spider{display:block; width:100%; max-width:420px; height:auto; margin:0 auto}
-.spider .bodyshape{fill:var(--surface); stroke:var(--ink); stroke-width:3}
-.spider .leg{stroke:var(--ink); stroke-width:3; stroke-linecap:round; fill:none}
-.spider .leg.known{stroke:var(--sun-deep); stroke-width:5}
-.spider .leg.extra{stroke:var(--warm); stroke-width:5}
-.spider .leg.ask{stroke:var(--teal); stroke-width:4}
-.spider text{fill:var(--ink); font-family:var(--font); font-weight:700; font-variant-numeric:tabular-nums}
-.spider .lbl{font-size:17px}
-.spider .nm{font-size:18px; font-weight:800}
-.spider .amt{font-size:20px; font-weight:800}
-.spider .amt.ask{fill:var(--teal)}
-.spider .pill{fill:var(--sun)}
-.spider .pill-t{fill:var(--sun-ink)}
-.spider .extra-t{fill:var(--warm-deep)}
+/* sun diagram, drawn the way she draws it: a sun with one ray for each part */
+.sunpic{display:block; width:100%; max-width:420px; height:auto; margin:0 auto}
+.sunpic .bodyshape{fill:var(--sun); stroke:var(--sun-deep); stroke-width:3}
+.sunpic .ray{stroke:var(--sun-deep); stroke-width:3; stroke-linecap:round; fill:none}
+.sunpic .ray.known{stroke:var(--ink); stroke-width:5}
+.sunpic .ray.extra{stroke:var(--warm); stroke-width:6}
+.sunpic .ray.ask{stroke:var(--teal); stroke-width:5}
+.sunpic text{fill:var(--ink); font-family:var(--font); font-weight:700; font-variant-numeric:tabular-nums}
+.sunpic .lbl{font-size:17px}
+.sunpic .nm{font-size:18px; font-weight:800}
+.sunpic .amt{font-size:20px; font-weight:800}
+.sunpic .amt.ask{fill:var(--teal)}
+.sunpic .in{fill:var(--sun-ink)}
+.sunpic .pill{fill:var(--sun)}
+.sunpic .pill-t{fill:var(--sun-ink)}
+.sunpic .extra-t{fill:var(--warm-deep)}
 .caps{margin:0; padding-left:1.3em; display:flex; flex-direction:column; gap:2px; font-weight:600}
 .help{background:var(--surface-2); border-radius:20px; padding:16px; display:flex; flex-direction:column; gap:12px}
 .steps{margin:0; padding-left:1.3em; display:flex; flex-direction:column; gap:4px}
@@ -130,6 +131,7 @@ p{margin:0}
 .shake{animation:shake .3s}
 @media (prefers-reduced-motion: reduce){*{animation:none!important; transition:none!important}}
 [hidden]{display:none!important}
+@media (max-width:420px){ .bar{flex-wrap:nowrap; gap:8px} .brand{min-width:0; font-size:.9em; gap:8px; padding:4px 0} .bar .btn.sm{padding:8px 12px} }
 @media (max-width:480px){ .qcard{padding:18px} .qtext{font-size:1.15em} .help{padding:12px} }
 </style>
 
@@ -219,7 +221,7 @@ function numbersCtx(){
 // kind: "part" (one share known, find another), "toTotal" (one share known, find the total),
 //       "fromTotal" (total known, find a share), "diff" (difference known, find a share or the total)
 const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
-const legs = x => x === 1 ? "1 leg" : x + " legs";
+const rays = x => x === 1 ? "1 ray" : x + " rays";
 function build(kind, ctx, r, opts = {}){
   const sum = r.reduce((a, b) => a + b, 0);
   const m = pick(ctx.mults);
@@ -229,34 +231,34 @@ function build(kind, ctx, r, opts = {}){
   const fmt = v => (ctx.unit.pre || "") + num(v) + (ctx.unit.post ? " " + ctx.unit.post : "");
   q.fmt = fmt;
   const lab = i => ctx.label(i), Lab = i => cap(ctx.label(i));
-  q.legsLine = r.map((x, i) => `${Lab(i)}: ${legs(x)}`).join(", ");
-  const partLine = j => `${Lab(j)}: ${legs(r[j])}, so ${r[j]} × ${fmt(m)} = ${fmt(shares[j])}`;
-  const totalLine = () => `All the legs: ${r.join(" + ")} = ${sum}, so ${sum} × ${fmt(m)} = ${fmt(T)}`;
+  q.raysLine = r.map((x, i) => `${Lab(i)}: ${rays(x)}`).join(", ");
+  const partLine = j => `${Lab(j)}: ${rays(r[j])}, so ${r[j]} × ${fmt(m)} = ${fmt(shares[j])}`;
+  const totalLine = () => `All the rays: ${r.join(" + ")} = ${sum}, so ${sum} × ${fmt(m)} = ${fmt(T)}`;
 
   if (kind === "part" || kind === "toTotal"){
     const k = kind === "part" ? (opts.k ?? ri(0, r.length - 1)) : ri(0, r.length - 1);
     const v = shares[k];
     q.k = k; q.lines = [ctx.setup(r), ctx.known(k, v)];
-    q.knownLine = `${Lab(k)}: ${legs(r[k])} = ${fmt(v)}`;
-    q.oneLeg = `1 leg = ${fmt(v)} ÷ ${r[k]} = ${fmt(m)}`;
+    q.knownLine = `${Lab(k)}: ${rays(r[k])} = ${fmt(v)}`;
+    q.oneRay = `1 ray = ${fmt(v)} ÷ ${r[k]} = ${fmt(m)}`;
     if (kind === "part"){
       let j; do { j = ri(0, r.length - 1); } while (j === k);
       q.j = j; q.ask = ctx.askPart(j); q.answer = shares[j]; q.finalLine = partLine(j);
       q.mistakes = [
-        [v / sum * r[j], `It looks like ${fmt(v)} was shared between ALL the legs. ${fmt(v)} is only ${ctx.labelPoss(k)} share, so share it between ${ctx.labelPoss(k)} ${legs(r[k])}.`],
-        [m, `${fmt(m)} is what 1 leg is worth. ${Lab(j)} has ${legs(r[j])}, so multiply by ${r[j]}.`],
-        [v / r[j] * r[k], `It looks like ${fmt(v)} was shared between the wrong legs. ${fmt(v)} belongs to ${lab(k)}, so share it between ${ctx.labelPoss(k)} ${legs(r[k])}.`],
-        [v * r[j], `You multiplied ${fmt(v)} by ${r[j]}. First share ${fmt(v)} between ${ctx.labelPoss(k)} ${legs(r[k])} to find what 1 leg is worth.`],
-        [T, `${fmt(T)} is all the legs. The question asks for ${lab(j)} only.`],
+        [v / sum * r[j], `It looks like ${fmt(v)} was shared between ALL the rays. ${fmt(v)} is only ${ctx.labelPoss(k)} share, so share it between ${ctx.labelPoss(k)} ${rays(r[k])}.`],
+        [m, `${fmt(m)} is what 1 ray is worth. ${Lab(j)} has ${rays(r[j])}, so multiply by ${r[j]}.`],
+        [v / r[j] * r[k], `It looks like ${fmt(v)} was shared between the wrong rays. ${fmt(v)} belongs to ${lab(k)}, so share it between ${ctx.labelPoss(k)} ${rays(r[k])}.`],
+        [v * r[j], `You multiplied ${fmt(v)} by ${r[j]}. First share ${fmt(v)} between ${ctx.labelPoss(k)} ${rays(r[k])} to find what 1 ray is worth.`],
+        [T, `${fmt(T)} is all the rays. The question asks for ${lab(j)} only.`],
         [v, `${fmt(v)} is ${ctx.labelPoss(k)} share. The question asks about ${lab(j)}.`]
       ];
     } else {
       q.j = "all"; q.ask = ctx.askTotal(); q.answer = T; q.finalLine = totalLine();
       const other = T - v;
       q.mistakes = [
-        [other, `${fmt(other)} is the other share. The question asks for all of it, so count ALL the legs: ${r.join(" + ")} = ${sum}.`],
-        [m, `${fmt(m)} is what 1 leg is worth. The spider has ${sum} legs altogether.`],
-        [v * sum, `You multiplied ${fmt(v)} by ${sum}. First share ${fmt(v)} between ${ctx.labelPoss(k)} ${legs(r[k])} to find what 1 leg is worth.`],
+        [other, `${fmt(other)} is the other share. The question asks for all of it, so count ALL the rays: ${r.join(" + ")} = ${sum}.`],
+        [m, `${fmt(m)} is what 1 ray is worth. The sun has ${sum} rays altogether.`],
+        [v * sum, `You multiplied ${fmt(v)} by ${sum}. First share ${fmt(v)} between ${ctx.labelPoss(k)} ${rays(r[k])} to find what 1 ray is worth.`],
         [v, `${fmt(v)} is just ${ctx.labelPoss(k)} share. The question asks for all of it.`]
       ];
     }
@@ -264,12 +266,12 @@ function build(kind, ctx, r, opts = {}){
   if (kind === "fromTotal"){
     const j = ri(0, r.length - 1); q.k = "all"; q.j = j;
     q.lines = [ctx.setupTotal(r, T)]; q.ask = ctx.askPart(j); q.answer = shares[j];
-    q.knownLine = `All the legs: ${r.join(" + ")} = ${legs(sum)} = ${fmt(T)}`;
-    q.oneLeg = `1 leg = ${fmt(T)} ÷ ${sum} = ${fmt(m)}`;
+    q.knownLine = `All the rays: ${r.join(" + ")} = ${rays(sum)} = ${fmt(T)}`;
+    q.oneRay = `1 ray = ${fmt(T)} ÷ ${sum} = ${fmt(m)}`;
     q.finalLine = partLine(j);
     q.mistakes = [
-      [m, `${fmt(m)} is what 1 leg is worth. ${Lab(j)} has ${legs(r[j])}, so multiply by ${r[j]}.`],
-      [T / r[j], `You shared it between ${legs(r[j])}. ${fmt(T)} is ALL of it, so share it between all the legs: ${r.join(" + ")} = ${sum}.`],
+      [m, `${fmt(m)} is what 1 ray is worth. ${Lab(j)} has ${rays(r[j])}, so multiply by ${r[j]}.`],
+      [T / r[j], `You shared it between ${rays(r[j])}. ${fmt(T)} is ALL of it, so share it between all the rays: ${r.join(" + ")} = ${sum}.`],
       [T - shares[j], `That is the other share. Check which one the question asks for.`],
       [T, `${fmt(T)} is all of it. The question asks for ${lab(j)} only.`]
     ];
@@ -282,20 +284,20 @@ function build(kind, ctx, r, opts = {}){
     q.lines = [ctx.setup(r), ctx.diff(p, qq, d)];
     q.ask = j === "all" ? ctx.askTotal() : ctx.askPart(j);
     q.answer = j === "all" ? T : shares[j];
-    q.knownLine = `Extra legs: ${r[p]} − ${r[qq]} = ${legs(dParts)} = ${fmt(d)}`;
-    q.oneLeg = `1 leg = ${fmt(d)} ÷ ${dParts} = ${fmt(m)}`;
+    q.knownLine = `Extra rays: ${r[p]} − ${r[qq]} = ${rays(dParts)} = ${fmt(d)}`;
+    q.oneRay = `1 ray = ${fmt(d)} ÷ ${dParts} = ${fmt(m)}`;
     q.finalLine = j === "all" ? totalLine() : partLine(j);
     const want = j === "all" ? sum : r[j], wantLabel = j === "all" ? "all of it" : lab(j);
     q.mistakes = [
-      [d / sum * want, `It looks like ${fmt(d)} was shared between ALL the legs. "More than" means ${fmt(d)} is only the EXTRA legs: ${r[p]} − ${r[qq]} = ${legs(dParts)}.`],
-      [d / r[p] * want, `It looks like ${fmt(d)} was shared between all of ${ctx.labelPoss(p)} legs. ${fmt(d)} is just the EXTRA legs: ${r[p]} − ${r[qq]} = ${legs(dParts)}.`],
-      [m, `${fmt(m)} is what 1 leg is worth. Now count the legs for ${wantLabel}: ${want}.`],
+      [d / sum * want, `It looks like ${fmt(d)} was shared between ALL the rays. "More than" means ${fmt(d)} is only the EXTRA rays: ${r[p]} − ${r[qq]} = ${rays(dParts)}.`],
+      [d / r[p] * want, `It looks like ${fmt(d)} was shared between all of ${ctx.labelPoss(p)} rays. ${fmt(d)} is just the EXTRA rays: ${r[p]} − ${r[qq]} = ${rays(dParts)}.`],
+      [m, `${fmt(m)} is what 1 ray is worth. Now count the rays for ${wantLabel}: ${want}.`],
       [d, `${fmt(d)} is the extra amount. The question asks for ${wantLabel}.`],
-      [d * want, `You multiplied ${fmt(d)} by ${want}. First share ${fmt(d)} between the ${legs(dParts)} that are extra.`]
+      [d * want, `You multiplied ${fmt(d)} by ${want}. First share ${fmt(d)} between the ${rays(dParts)} that are extra.`]
     ];
-    if (j !== "all") q.mistakes.push([T, `${fmt(T)} is all the legs. The question asks for ${wantLabel} only.`]);
+    if (j !== "all") q.mistakes.push([T, `${fmt(T)} is all the rays. The question asks for ${wantLabel} only.`]);
   }
-  q.steps = [q.legsLine, q.knownLine, q.oneLeg, q.finalLine];
+  q.steps = [q.raysLine, q.knownLine, q.oneRay, q.finalLine];
   q.mistakes = q.mistakes.filter(([v]) => !near(v, q.answer));
   return q;
 }
@@ -336,18 +338,18 @@ function newRound(level){
 }
 function resetQ(){ S.tries = 0; S.help = 0; S.done = false; S.msg = null; S.value = ""; }
 
-/* ---------------- spider ---------------- */
-// stage 1: body and legs; 2: the number you know; 3: what 1 leg is worth on every leg; 4: everything
-function spiderHTML(q, stage){
+/* ---------------- sun ---------------- */
+// stage 1: sun and rays; 2: the number you know; 3: what 1 ray is worth on every ray; 4: everything
+function sunHTML(q, stage){
   const n = q.r.length, three = n === 3;
   const W = 360, cx = 180, cy = 150, rx = 54, ry = 40, L = 36;
   const H = three ? 360 : 280;
   const centres = three ? [200, -20, 90] : [180, 0];
   const maxSpan = three ? 100 : 140;
   const pre = q.unit.pre || "";
-  const leg1 = pre + num(q.m);
+  const ray1 = pre + num(q.m);
   const amt = v => pre + num(v);
-  let legsSvg = "", lblSvg = "", nmSvg = "";
+  let raysSvg = "", lblSvg = "", nmSvg = "";
   q.r.forEach((cnt, g) => {
     const span = cnt > 1 ? Math.min(maxSpan, 20 * (cnt - 1)) : 0;
     const known = stage >= 2 && (q.k === g || q.k === "all");
@@ -358,12 +360,12 @@ function spiderHTML(q, stage){
       const x1 = cx + rx * c, y1 = cy + ry * sn, x2 = x1 + L * c, y2 = y1 + L * sn;
       const extra = stage >= 2 && q.k === "extra" && g === q.p && i >= q.r[q.qq];
       const cls = extra ? "extra" : known ? "known" : ask ? "ask" : "";
-      legsSvg += `<line class="leg ${cls}" x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}"/>`;
+      raysSvg += `<line class="ray ${cls}" x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}"/>`;
       if (stage >= 3){
         const off = 14 + (three && g === 2 && i % 2 ? 16 : 0);
         const lx = x2 + off * c, ly = y2 + off * sn + 5;
         const anchor = c < -0.3 ? "end" : c > 0.3 ? "start" : "middle";
-        lblSvg += `<text class="lbl ${extra ? "extra-t" : ""}" x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anchor}">${esc(leg1)}</text>`;
+        lblSvg += `<text class="lbl ${extra ? "extra-t" : ""}" x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anchor}">${esc(ray1)}</text>`;
       }
     }
     // name and amount, above each side like her drawings (third person goes underneath)
@@ -383,43 +385,43 @@ function spiderHTML(q, stage){
   let bodyTxt = "";
   if (q.k === "all" || q.j === "all"){
     const show = q.k === "all" ? stage >= 2 : stage >= 4;
-    bodyTxt = `<text class="lbl" x="${cx}" y="${cy - 6}" text-anchor="middle">All</text><text class="amt ${q.k === "all" ? "" : "ask"}" x="${cx}" y="${cy + 16}" text-anchor="middle">${show ? esc(amt(q.T)) : "?"}</text>`;
+    bodyTxt = `<text class="lbl in" x="${cx}" y="${cy - 6}" text-anchor="middle">All</text><text class="amt in" x="${cx}" y="${cy + 16}" text-anchor="middle">${show ? esc(amt(q.T)) : "?"}</text>`;
   }
   if (q.k === "extra" && stage >= 2 && q.j !== "all"){
-    bodyTxt = `<text class="lbl extra-t" x="${cx}" y="${cy - 6}" text-anchor="middle">Extra</text><text class="amt" x="${cx}" y="${cy + 16}" text-anchor="middle">${esc(amt(q.dValue))}</text>`;
+    bodyTxt = `<text class="lbl in" x="${cx}" y="${cy - 6}" text-anchor="middle">Extra</text><text class="amt in" x="${cx}" y="${cy + 16}" text-anchor="middle">${esc(amt(q.dValue))}</text>`;
   }
   const extraNote = q.k === "extra" && stage >= 2 && q.j === "all"
-    ? `<text class="lbl extra-t" x="${cx}" y="${H - 8}" text-anchor="middle">Extra legs = ${esc(amt(q.dValue))}</text>` : "";
-  const desc = q.r.map((x, i) => `${q.cols[i]}: ${legs(x)}`).join(", ");
-  return `<svg class="spider" viewBox="0 0 ${W} ${H}" role="img" aria-label="Spider diagram. ${esc(desc)}">
-    ${legsSvg}<ellipse class="bodyshape" cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}"/>${bodyTxt}${lblSvg}${nmSvg}${extraNote}</svg>`;
+    ? `<text class="lbl extra-t" x="${cx}" y="${H - 8}" text-anchor="middle">Extra rays = ${esc(amt(q.dValue))}</text>` : "";
+  const desc = q.r.map((x, i) => `${q.cols[i]}: ${rays(x)}`).join(", ");
+  return `<svg class="sunpic" viewBox="0 0 ${W} ${H}" role="img" aria-label="Sun diagram. ${esc(desc)}">
+    ${raysSvg}<ellipse class="bodyshape" cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}"/>${bodyTxt}${lblSvg}${nmSvg}${extraNote}</svg>`;
 }
 function helpLines(q, stage){
-  return `<ol class="caps small">${[q.legsLine, q.knownLine, q.oneLeg].slice(0, stage).map(t => `<li>${esc(t)}</li>`).join("")}</ol>`;
+  return `<ol class="caps small">${[q.raysLine, q.knownLine, q.oneRay].slice(0, stage).map(t => `<li>${esc(t)}</li>`).join("")}</ol>`;
 }
 const HELP_TEXT = [
   "",
-  "Step 1: draw the spider. Give each person one leg for every part of the ratio.",
-  "Step 2: write the number you know. Is it ONE person's legs, ALL the legs, or just the EXTRA legs?",
-  "Step 3: share it out to find what 1 leg is worth. Write it on every leg, then count the legs you need."
+  "Step 1: draw the sun. Give each person one ray for every part of the ratio.",
+  "Step 2: write the number you know. Is it ONE person's rays, ALL the rays, or just the EXTRA rays?",
+  "Step 3: share it out to find what 1 ray is worth. Write it on every ray, then count the rays you need."
 ];
 
 /* ---------------- views ---------------- */
 function bar(){
-  return `<header class="bar"><button class="brand" data-act="home" aria-label="Home"><span class="logo">2:3</span><span>Ratio Spiders</span></button>
-    <a class="btn ghost sm" style="text-decoration:none" href="../" aria-label="All topics" title="All topics">All topics</a>
+  return `<header class="bar"><button class="brand" data-act="home" aria-label="Home"><span class="logo">2:3</span><span>Ratio Sunshine</span></button>
+    <a class="btn ghost sm" style="text-decoration:none" href="../" aria-label="All topics" title="All topics">Topics</a>
     <button class="iconbtn" data-act="speak" aria-label="Read the question aloud" title="Read aloud" ${S.view === "play" ? "" : "hidden"}>
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12"/></svg></button></header>`;
 }
 function homeView(){
   return `${bar()}
   <div style="display:flex;flex-direction:column;gap:8px"><h1>Pick a level</h1>
-  <p class="muted">Ten questions each time, all new. Type your answer and press Check. If you get stuck, press Help me and the spider is drawn one step at a time.</p></div>
+  <p class="muted">Ten questions each time, all new. Type your answer and press Check. If you get stuck, press Help me and the sun is drawn one step at a time.</p></div>
   <div class="levels">${LEVELS.map((l, i) => `<button class="level" data-act="level" data-i="${i}">
     <span class="top"><span class="lvnum">${i + 1}</span><span class="best">${S.best[l.id] != null ? "Best: " + S.best[l.id] + " / " + ROUND * 3 + " stars" : "Not played yet"}</span></span>
     <b>${esc(l.name)}</b><span class="eg">${esc(l.eg)}</span></button>`).join("")}</div>
   <div class="tipcard"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex:none;margin-top:3px"><path d="M9 18h6M10 21h4M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z"/></svg>
-  <p><b>Ask yourself every time:</b> is the number I know ONE person's legs, ALL the legs, or just the EXTRA legs? That tells you how many legs to share it between.</p></div>`;
+  <p><b>Ask yourself every time:</b> is the number I know ONE person's rays, ALL the rays, or just the EXTRA rays? That tells you how many rays to share it between.</p></div>`;
 }
 function dots(){
   return `<div class="dots" aria-hidden="true">${S.qs.map((_, i) => `<i class="${i < S.results.length ? "s" + S.results[i] : ""} ${i === S.i ? "now" : ""}"></i>`).join("")}</div>`;
@@ -433,7 +435,7 @@ function playView(){
   <div class="qcard">
     <div class="qhead"><div><span class="eyebrow">${esc(S.level.name)}</span>
       <p class="qtext">${q.lines.map(esc).join(" ")}<span class="ask">${esc(q.ask)}</span></p></div></div>
-    ${S.help > 0 && !solved ? `<div class="help"><p class="small"><b>${esc(HELP_TEXT[S.help])}</b></p>${spiderHTML(q, S.help)}${helpLines(q, S.help)}
+    ${S.help > 0 && !solved ? `<div class="help"><p class="small"><b>${esc(HELP_TEXT[S.help])}</b></p>${sunHTML(q, S.help)}${helpLines(q, S.help)}
         ${S.help < 3 ? `<div><button class="btn ghost sm" data-act="help">Next step</button></div>` : ""}</div>` : ""}
     ${!solved ? `<div class="answer"><label class="field" for="ans">${u.pre ? `<span>${esc(u.pre)}</span>` : ""}<input id="ans" inputmode="decimal" autocomplete="off" placeholder="Your answer" aria-label="Your answer" value="${esc(S.value)}">${u.post ? `<span>${esc(u.post)}</span>` : ""}</label></div>
       <div class="keypad" role="group" aria-label="Number keys">
@@ -452,7 +454,7 @@ function feedbackHTML(q){
   return `<div class="feedback ${ok ? "ok" : "no"}" role="status">
     <span class="head">${ok ? (stars === 3 ? "Yes! First time, no help." : "Yes, that's right.") : "The answer is " + esc(q.fmt(q.answer)) + "."}</span>
     ${!ok && m.text ? `<p>${esc(m.text)}</p>` : ""}
-    ${spiderHTML(q, 4)}
+    ${sunHTML(q, 4)}
     <ol class="steps">${q.steps.map(s => `<li>${esc(s)}</li>`).join("")}</ol>
     <div class="row"><button class="btn ${ok ? "good" : "teal"}" data-act="next" id="nextBtn">${S.i + 1 < ROUND ? "Next question" : "See my score"}</button></div>
   </div>`;
@@ -502,7 +504,7 @@ function check(){
   if (S.tries >= 2){
     S.results[S.i] = 0; S.done = true; S.msg = {type:"reveal", text: hit ? hit[1] : ""}; render(); document.getElementById("nextBtn")?.focus(); return;
   }
-  S.msg = {type:"wrong", text: hit ? hit[1] : "Check which legs the number you know belongs to. Press Help me to see the spider."};
+  S.msg = {type:"wrong", text: hit ? hit[1] : "Check which rays the number you know belongs to. Press Help me to see the sun."};
   S.value = ""; render(); shakeInput(); focusInput();
 }
 function shakeInput(){ const f = document.querySelector(".field"); if (f){ f.classList.add("shake"); setTimeout(() => f.classList.remove("shake"), 350); } }

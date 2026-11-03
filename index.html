@@ -6,20 +6,32 @@
 <title>GCSE Maths Revision</title>
 <meta name="description" content="GCSE Maths Foundation revision: practice questions by topic.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&display=swap">
+<script>
+  // Apply the saved background colour before the page draws, so it does not flash.
+  try { var t = localStorage.getItem("cover-tint"); if (t) document.documentElement.dataset.tint = t; } catch (e) {}
+</script>
 <style>
-/* Same colours and font as the practice pages, so moving between them feels like one place. */
+/* Dyslexia-friendly choices (British Dyslexia Association style guide):
+   Lexend (a clear sans-serif), large text, generous line, letter and word spacing,
+   left-aligned short lines, no capitals for emphasis, no italics, soft background
+   instead of bright white, dark grey-blue text instead of black, nothing overlapping text. */
 :root{
-  --font:'Lexend', Verdana, 'Trebuchet MS', system-ui, sans-serif;
-  --bg:#FBF6E4; --surface:#FFFFFF; --surface-2:#F3EEDB; --ink:#16213A; --ink-soft:#4E5873; --line:#DED6BC;
+  --font:'Lexend', Verdana, Tahoma, system-ui, sans-serif;
+  --bg:#FBF6E4; --surface:#FFFCF2; --surface-2:#F3EEDB; --ink:#1F2A44; --ink-soft:#46506A; --line:#D9D0B4;
   --sun:#F4BE1E; --sun-deep:#C99700; --sun-ink:#231A00;
   --teal:#1B7F79; --teal-deep:#11605B; --teal-soft:#DDF0EE;
   --berry:#7A4FA0; --berry-soft:#EFE4F6;
-  --on-accent:#FFFFFF; --shadow:rgba(22,33,58,.10);
+  --on-accent:#FFFFFF; --shadow:rgba(31,42,68,.10);
 }
+/* Background colours she can pick. Defined before dark mode so dark mode still wins. */
+:root[data-tint="blue"]{--bg:#E3EEF8; --surface:#F4F8FC; --surface-2:#E8F0F8; --line:#C3D3E4}
+:root[data-tint="green"]{--bg:#E4F2E6; --surface:#F5FAF5; --surface-2:#E8F3E9; --line:#C4DCC7}
+:root[data-tint="peach"]{--bg:#FBE9DD; --surface:#FFF7F1; --surface-2:#F8EADF; --line:#E6CDBB}
+:root[data-tint="lilac"]{--bg:#EEE7F6; --surface:#FAF7FD; --surface-2:#F0EAF7; --line:#D8CBE6}
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#17150F; --surface:#1F222B; --surface-2:#2A2E39; --ink:#F2EFE3; --ink-soft:#B8B6AA; --line:#3A3F4C;
+    --bg:#1A1914; --surface:#24262E; --surface-2:#2D313B; --ink:#EDEADF; --ink-soft:#BDBBB0; --line:#404552;
     --sun:#F5C432; --sun-deep:#B88E0A; --sun-ink:#1E1600;
     --teal:#4CC2B8; --teal-deep:#2E8E86; --teal-soft:#173836;
     --berry:#C9A2EA; --berry-soft:#2E2238;
@@ -27,7 +39,7 @@
   }
 }
 :root[data-theme="dark"]{
-  --bg:#17150F; --surface:#1F222B; --surface-2:#2A2E39; --ink:#F2EFE3; --ink-soft:#B8B6AA; --line:#3A3F4C;
+  --bg:#1A1914; --surface:#24262E; --surface-2:#2D313B; --ink:#EDEADF; --ink-soft:#BDBBB0; --line:#404552;
   --sun:#F5C432; --sun-deep:#B88E0A; --sun-ink:#1E1600;
   --teal:#4CC2B8; --teal-deep:#2E8E86; --teal-soft:#173836;
   --berry:#C9A2EA; --berry-soft:#2E2238;
@@ -35,56 +47,85 @@
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{margin:0; font-family:var(--font); font-size:19px; line-height:1.6; background:var(--bg); color:var(--ink)}
+body{margin:0; font-family:var(--font); font-size:20px; line-height:1.75; letter-spacing:.03em; word-spacing:.12em; background:var(--bg); color:var(--ink); text-align:left}
 a{color:inherit}
-:focus-visible{outline:3px solid var(--teal); outline-offset:3px; border-radius:10px}
-.wrap{max-width:760px; margin:0 auto; padding:24px max(16px, env(safe-area-inset-right, 0px)) 56px max(16px, env(safe-area-inset-left, 0px)); display:flex; flex-direction:column; gap:28px}
-h1,h2,h3{margin:0; line-height:1.2; text-wrap:balance; font-weight:800}
-p{margin:0}
+button{font:inherit; letter-spacing:inherit; word-spacing:inherit; color:inherit}
+:focus-visible{outline:4px solid var(--teal); outline-offset:3px; border-radius:12px}
+.wrap{max-width:680px; margin:0 auto; padding:28px max(16px, env(safe-area-inset-right, 0px)) 60px max(16px, env(safe-area-inset-left, 0px)); display:flex; flex-direction:column; gap:32px}
+h1,h2{margin:0; line-height:1.3; font-weight:700}
+p{margin:0; max-width:60ch}
 
 /* cover */
-.cover{background:var(--surface); border:3px solid var(--ink); border-radius:28px; box-shadow:0 8px 0 var(--ink); padding:28px 24px; display:flex; flex-direction:column; gap:14px; position:relative; overflow:hidden}
-.badge{align-self:flex-start; font-size:.72em; font-weight:700; text-transform:uppercase; letter-spacing:.08em; background:var(--sun); color:var(--sun-ink); border-radius:999px; padding:4px 12px}
-.cover h1{font-size:2.1em}
-.cover p{color:var(--ink-soft); max-width:34em}
-.deco{position:absolute; right:-18px; top:-18px; width:150px; height:150px; opacity:.9; pointer-events:none}
-.deco text{font-family:var(--font); font-weight:800}
+.cover{background:var(--surface); border:3px solid var(--ink); border-radius:26px; box-shadow:0 7px 0 var(--ink); padding:26px 22px; display:flex; flex-direction:column; gap:18px}
+.brandrow{display:flex; align-items:center; gap:14px}
+.logo{width:56px; height:56px; border-radius:16px; background:var(--sun); color:var(--sun-ink); display:grid; place-items:center; box-shadow:0 4px 0 var(--sun-deep); font-weight:700; font-size:.95em; flex:none; letter-spacing:0}
+.level{font-size:.9em; font-weight:600; color:var(--ink-soft)}
+.cover h1{font-size:2em}
+.how{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px}
+.how li{display:flex; gap:12px; align-items:flex-start}
+.how .n{flex:none; width:34px; height:34px; border-radius:50%; background:var(--teal-soft); color:var(--teal); display:grid; place-items:center; font-weight:700; font-size:.85em; margin-top:3px; letter-spacing:0}
+
+/* tools: read aloud and background colour */
+.tools{display:flex; flex-wrap:wrap; gap:14px; align-items:center}
+.btn{display:inline-flex; align-items:center; gap:10px; min-height:52px; padding:10px 20px; border-radius:16px; border:2px solid var(--line); background:var(--surface); box-shadow:0 4px 0 var(--line); font-weight:600; cursor:pointer}
+.btn:active{transform:translateY(3px); box-shadow:0 1px 0 var(--line)}
+.tints{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.tints span{font-size:.85em; color:var(--ink-soft)}
+.tint{width:44px; height:44px; border-radius:50%; border:3px solid var(--line); cursor:pointer; padding:0}
+.tint[aria-pressed="true"]{border-color:var(--ink); box-shadow:0 0 0 3px var(--surface) inset}
 
 /* topics */
-.topics{display:flex; flex-direction:column; gap:20px}
-.topic{background:var(--surface); border:2px solid var(--line); border-radius:24px; padding:20px; display:flex; flex-direction:column; gap:14px; box-shadow:0 5px 0 var(--shadow)}
-.thead{display:flex; align-items:center; gap:14px}
-.ticon{width:52px; height:52px; border-radius:16px; display:grid; place-items:center; font-weight:800; font-size:1.05em; flex:none}
+.topics{display:flex; flex-direction:column; gap:24px}
+.topic{background:var(--surface); border:2px solid var(--line); border-radius:24px; padding:22px 20px; display:flex; flex-direction:column; gap:16px; box-shadow:0 5px 0 var(--shadow)}
+.thead{display:flex; align-items:center; gap:16px}
+.ticon{width:56px; height:56px; border-radius:16px; display:grid; place-items:center; font-weight:700; font-size:1em; flex:none; letter-spacing:0}
 .algebra .ticon{background:var(--berry-soft); color:var(--berry)}
 .ratio .ticon{background:var(--teal-soft); color:var(--teal)}
-.thead h2{font-size:1.35em}
-.thead .count{font-size:.8em; color:var(--ink-soft)}
-.sets{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px}
-.set{display:flex; align-items:center; gap:14px; text-decoration:none; background:var(--surface-2); border:2px solid transparent; border-radius:18px; padding:14px 16px; transition:transform .1s, border-color .1s}
-a.set:hover{border-color:var(--teal); transform:translateY(-2px)}
-.set .txt{flex:1; min-width:0; display:flex; flex-direction:column}
-.set b{font-size:1.05em}
-.set small{font-size:.8em; color:var(--ink-soft)}
-.go{flex:none; width:44px; height:44px; border-radius:14px; background:var(--teal); color:var(--on-accent); display:grid; place-items:center; box-shadow:0 4px 0 var(--teal-deep)}
-.soon{border:2px dashed var(--line); background:transparent; color:var(--ink-soft)}
-.soon b{color:var(--ink-soft)}
-.tag{flex:none; font-size:.72em; font-weight:700; border-radius:999px; padding:3px 10px; background:var(--surface-2); color:var(--ink-soft); border:2px solid var(--line)}
-footer{font-size:.8em; color:var(--ink-soft); text-align:center}
-@media (max-width:480px){ .cover h1{font-size:1.7em} .deco{width:110px; height:110px} }
+.thead h2{font-size:1.4em}
+.thead .count{font-size:.85em; color:var(--ink-soft)}
+.sets{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:12px}
+.set{display:flex; align-items:center; gap:16px; text-decoration:none; background:var(--surface-2); border:3px solid transparent; border-radius:18px; padding:16px 18px; min-height:72px}
+a.set:hover{border-color:var(--teal)}
+.set .txt{flex:1 1 220px; min-width:0; display:flex; flex-direction:column; gap:2px}
+.set b{font-size:1.1em; font-weight:700}
+.set small{font-size:.85em; color:var(--ink-soft)}
+.go{flex:none; display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border-radius:14px; background:var(--teal); color:var(--on-accent); box-shadow:0 4px 0 var(--teal-deep); font-weight:700; font-size:.9em}
+.soon{border:3px dashed var(--line); background:transparent}
+footer p{font-size:.9em; color:var(--ink-soft)}
+@media (max-width:480px){ body{font-size:19px} .cover h1{font-size:1.65em} .set{flex-wrap:wrap} }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .tints{display:none} }
+:root[data-theme="dark"] .tints{display:none}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
 <main class="wrap">
 
-  <header class="cover">
-    <svg class="deco" viewBox="0 0 150 150" aria-hidden="true">
-      <circle cx="90" cy="60" r="56" fill="var(--sun)"/>
-      <text x="90" y="72" text-anchor="middle" font-size="34" fill="var(--sun-ink)">2:3</text>
-    </svg>
-    <span class="badge">GCSE Maths · Foundation</span>
+  <header class="cover" id="cover">
+    <div class="brandrow">
+      <span class="logo" aria-hidden="true">2:3</span>
+      <span class="level">GCSE Maths, Foundation</span>
+    </div>
     <h1>My Maths Revision</h1>
-    <p>Pick a topic, then pick some practice. Every practice set gives you new questions each time, and there is a Help me button if you get stuck.</p>
+    <ol class="how" aria-label="How to use this page">
+      <li><span class="n" aria-hidden="true">1</span><p>Pick a topic.</p></li>
+      <li><span class="n" aria-hidden="true">2</span><p>Press Start on some practice.</p></li>
+      <li><span class="n" aria-hidden="true">3</span><p>Stuck? Press Help me.</p></li>
+    </ol>
+    <div class="tools">
+      <button class="btn" id="readBtn" type="button">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12"/></svg>
+        <span>Read to me</span>
+      </button>
+      <div class="tints" role="group" aria-label="Background colour">
+        <span>Background:</span>
+        <button class="tint" type="button" data-tint="" style="background:#FBF6E4" aria-label="Cream"></button>
+        <button class="tint" type="button" data-tint="blue" style="background:#D6E6F5" aria-label="Blue"></button>
+        <button class="tint" type="button" data-tint="green" style="background:#D6ECD9" aria-label="Green"></button>
+        <button class="tint" type="button" data-tint="peach" style="background:#F8DCC9" aria-label="Peach"></button>
+        <button class="tint" type="button" data-tint="lilac" style="background:#E2D6F0" aria-label="Lilac"></button>
+      </div>
+    </div>
   </header>
 
   <section class="topics" aria-label="Topics">
@@ -94,29 +135,65 @@ footer{font-size:.8em; color:var(--ink-soft); text-align:center}
     <article class="topic algebra" id="algebra">
       <div class="thead">
         <span class="ticon" aria-hidden="true">x+y</span>
-        <div><h2>Algebra</h2><span class="count">Practice coming soon</span></div>
+        <div><h2>Algebra</h2><span class="count">Coming soon</span></div>
       </div>
       <ul class="sets">
-        <li><div class="set soon"><span class="txt"><b>Algebra practice</b><small>On its way. Check back soon.</small></span><span class="tag">Soon</span></div></li>
+        <li><div class="set soon"><span class="txt"><b>Algebra practice</b><small>This is on its way.</small></span></div></li>
       </ul>
     </article>
 
     <article class="topic ratio" id="ratio">
       <div class="thead">
         <span class="ticon" aria-hidden="true">a:b</span>
-        <div><h2>Ratio &amp; Proportion</h2><span class="count">1 practice set</span></div>
+        <div><h2>Ratio and Proportion</h2><span class="count">1 practice set</span></div>
       </div>
       <ul class="sets">
         <li><a class="set" href="ratio-trainer/">
-          <span class="txt"><b>Ratio Spiders</b><small>Sharing in a ratio, totals and "more than" questions. 5 levels.</small></span>
-          <span class="go" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></span>
+          <span class="txt"><b>Ratio Sunshine</b><small>Share an amount in a ratio. 5 levels.</small></span>
+          <span class="go">Start <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></span>
         </a></li>
       </ul>
     </article>
 
   </section>
 
-  <footer>Tip: add this page to your home screen so it opens like an app.</footer>
+  <footer><p>Tip: add this page to your home screen. Then it opens like an app.</p></footer>
 </main>
+
+<script>
+// Background colour picker, remembered on this device.
+const tints = document.querySelectorAll(".tint");
+function showTint(){
+  const now = document.documentElement.dataset.tint || "";
+  tints.forEach(b => b.setAttribute("aria-pressed", String(b.dataset.tint === now)));
+}
+tints.forEach(b => b.addEventListener("click", () => {
+  const t = b.dataset.tint;
+  if (t) document.documentElement.dataset.tint = t; else delete document.documentElement.dataset.tint;
+  try { t ? localStorage.setItem("cover-tint", t) : localStorage.removeItem("cover-tint"); } catch (e) {}
+  showTint();
+}));
+showTint();
+
+// Read the page aloud in a British voice.
+const readBtn = document.getElementById("readBtn");
+const readLabel = readBtn.querySelector("span");
+readBtn.addEventListener("click", () => {
+  const ss = window.speechSynthesis;
+  if (!ss) { readLabel.textContent = "Not on this device"; return; }
+  if (ss.speaking) { ss.cancel(); readLabel.textContent = "Read to me"; return; }
+  const parts = ["My Maths Revision.", "Pick a topic.", "Press Start on some practice.", "Stuck? Press Help me."];
+  document.querySelectorAll(".topic").forEach(t => {
+    parts.push(t.querySelector("h2").textContent + ".");
+    t.querySelectorAll(".set").forEach(s => parts.push(s.querySelector("b").textContent + ". " + s.querySelector("small").textContent));
+  });
+  const u = new SpeechSynthesisUtterance(parts.join(" "));
+  u.lang = "en-GB"; u.rate = .9;
+  const v = ss.getVoices().find(x => /en-GB/i.test(x.lang)); if (v) u.voice = v;
+  u.onend = u.onerror = () => { readLabel.textContent = "Read to me"; };
+  readLabel.textContent = "Stop reading";
+  ss.speak(u);
+});
+</script>
 </body>
 </html>
