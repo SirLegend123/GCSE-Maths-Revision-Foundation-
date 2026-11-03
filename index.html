@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>GCSE Maths Revision</title>
+<meta name="description" content="GCSE Maths Foundation revision: practice questions by topic.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;800&display=swap">
+<style>
+/* Same colours and font as the practice pages, so moving between them feels like one place. */
+:root{
+  --font:'Lexend', Verdana, 'Trebuchet MS', system-ui, sans-serif;
+  --bg:#FBF6E4; --surface:#FFFFFF; --surface-2:#F3EEDB; --ink:#16213A; --ink-soft:#4E5873; --line:#DED6BC;
+  --sun:#F4BE1E; --sun-deep:#C99700; --sun-ink:#231A00;
+  --teal:#1B7F79; --teal-deep:#11605B; --teal-soft:#DDF0EE;
+  --berry:#7A4FA0; --berry-soft:#EFE4F6;
+  --on-accent:#FFFFFF; --shadow:rgba(22,33,58,.10);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#17150F; --surface:#1F222B; --surface-2:#2A2E39; --ink:#F2EFE3; --ink-soft:#B8B6AA; --line:#3A3F4C;
+    --sun:#F5C432; --sun-deep:#B88E0A; --sun-ink:#1E1600;
+    --teal:#4CC2B8; --teal-deep:#2E8E86; --teal-soft:#173836;
+    --berry:#C9A2EA; --berry-soft:#2E2238;
+    --on-accent:#0E1A14; --shadow:rgba(0,0,0,.35); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#17150F; --surface:#1F222B; --surface-2:#2A2E39; --ink:#F2EFE3; --ink-soft:#B8B6AA; --line:#3A3F4C;
+  --sun:#F5C432; --sun-deep:#B88E0A; --sun-ink:#1E1600;
+  --teal:#4CC2B8; --teal-deep:#2E8E86; --teal-soft:#173836;
+  --berry:#C9A2EA; --berry-soft:#2E2238;
+  --on-accent:#0E1A14; --shadow:rgba(0,0,0,.35); color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0; font-family:var(--font); font-size:19px; line-height:1.6; background:var(--bg); color:var(--ink)}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--teal); outline-offset:3px; border-radius:10px}
+.wrap{max-width:760px; margin:0 auto; padding:24px max(16px, env(safe-area-inset-right, 0px)) 56px max(16px, env(safe-area-inset-left, 0px)); display:flex; flex-direction:column; gap:28px}
+h1,h2,h3{margin:0; line-height:1.2; text-wrap:balance; font-weight:800}
+p{margin:0}
+
+/* cover */
+.cover{background:var(--surface); border:3px solid var(--ink); border-radius:28px; box-shadow:0 8px 0 var(--ink); padding:28px 24px; display:flex; flex-direction:column; gap:14px; position:relative; overflow:hidden}
+.badge{align-self:flex-start; font-size:.72em; font-weight:700; text-transform:uppercase; letter-spacing:.08em; background:var(--sun); color:var(--sun-ink); border-radius:999px; padding:4px 12px}
+.cover h1{font-size:2.1em}
+.cover p{color:var(--ink-soft); max-width:34em}
+.deco{position:absolute; right:-18px; top:-18px; width:150px; height:150px; opacity:.9; pointer-events:none}
+.deco text{font-family:var(--font); font-weight:800}
+
+/* topics */
+.topics{display:flex; flex-direction:column; gap:20px}
+.topic{background:var(--surface); border:2px solid var(--line); border-radius:24px; padding:20px; display:flex; flex-direction:column; gap:14px; box-shadow:0 5px 0 var(--shadow)}
+.thead{display:flex; align-items:center; gap:14px}
+.ticon{width:52px; height:52px; border-radius:16px; display:grid; place-items:center; font-weight:800; font-size:1.05em; flex:none}
+.algebra .ticon{background:var(--berry-soft); color:var(--berry)}
+.ratio .ticon{background:var(--teal-soft); color:var(--teal)}
+.thead h2{font-size:1.35em}
+.thead .count{font-size:.8em; color:var(--ink-soft)}
+.sets{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px}
+.set{display:flex; align-items:center; gap:14px; text-decoration:none; background:var(--surface-2); border:2px solid transparent; border-radius:18px; padding:14px 16px; transition:transform .1s, border-color .1s}
+a.set:hover{border-color:var(--teal); transform:translateY(-2px)}
+.set .txt{flex:1; min-width:0; display:flex; flex-direction:column}
+.set b{font-size:1.05em}
+.set small{font-size:.8em; color:var(--ink-soft)}
+.go{flex:none; width:44px; height:44px; border-radius:14px; background:var(--teal); color:var(--on-accent); display:grid; place-items:center; box-shadow:0 4px 0 var(--teal-deep)}
+.soon{border:2px dashed var(--line); background:transparent; color:var(--ink-soft)}
+.soon b{color:var(--ink-soft)}
+.tag{flex:none; font-size:.72em; font-weight:700; border-radius:999px; padding:3px 10px; background:var(--surface-2); color:var(--ink-soft); border:2px solid var(--line)}
+footer{font-size:.8em; color:var(--ink-soft); text-align:center}
+@media (max-width:480px){ .cover h1{font-size:1.7em} .deco{width:110px; height:110px} }
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+
+  <header class="cover">
+    <svg class="deco" viewBox="0 0 150 150" aria-hidden="true">
+      <circle cx="90" cy="60" r="56" fill="var(--sun)"/>
+      <text x="90" y="72" text-anchor="middle" font-size="34" fill="var(--sun-ink)">2:3</text>
+    </svg>
+    <span class="badge">GCSE Maths · Foundation</span>
+    <h1>My Maths Revision</h1>
+    <p>Pick a topic, then pick some practice. Every practice set gives you new questions each time, and there is a Help me button if you get stuck.</p>
+  </header>
+
+  <section class="topics" aria-label="Topics">
+
+    <!-- To add a practice set: copy one <li> inside the right topic and change the link and words. -->
+
+    <article class="topic algebra" id="algebra">
+      <div class="thead">
+        <span class="ticon" aria-hidden="true">x+y</span>
+        <div><h2>Algebra</h2><span class="count">Practice coming soon</span></div>
+      </div>
+      <ul class="sets">
+        <li><div class="set soon"><span class="txt"><b>Algebra practice</b><small>On its way. Check back soon.</small></span><span class="tag">Soon</span></div></li>
+      </ul>
+    </article>
+
+    <article class="topic ratio" id="ratio">
+      <div class="thead">
+        <span class="ticon" aria-hidden="true">a:b</span>
+        <div><h2>Ratio &amp; Proportion</h2><span class="count">1 practice set</span></div>
+      </div>
+      <ul class="sets">
+        <li><a class="set" href="ratio-trainer/">
+          <span class="txt"><b>Ratio Spiders</b><small>Sharing in a ratio, totals and "more than" questions. 5 levels.</small></span>
+          <span class="go" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></span>
+        </a></li>
+      </ul>
+    </article>
+
+  </section>
+
+  <footer>Tip: add this page to your home screen so it opens like an app.</footer>
+</main>
+</body>
+</html>

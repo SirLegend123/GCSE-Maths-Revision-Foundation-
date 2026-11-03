@@ -407,6 +407,7 @@ const HELP_TEXT = [
 /* ---------------- views ---------------- */
 function bar(){
   return `<header class="bar"><button class="brand" data-act="home" aria-label="Home"><span class="logo">2:3</span><span>Ratio Spiders</span></button>
+    <a class="btn ghost sm" style="text-decoration:none" href="../" aria-label="All topics" title="All topics">All topics</a>
     <button class="iconbtn" data-act="speak" aria-label="Read the question aloud" title="Read aloud" ${S.view === "play" ? "" : "hidden"}>
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12"/></svg></button></header>`;
 }
