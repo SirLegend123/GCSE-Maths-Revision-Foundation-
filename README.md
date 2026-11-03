@@ -6,7 +6,7 @@ Open the revision cover page (`index.html`) to choose a topic. On GitHub Pages: 
 
 ### Algebra
 
-- Practice coming soon.
+- [Algebra Practice](algebra/index.html): Sophie's Autumn 1 sheets as interactive practice. Session 1: brackets and equations. Session 2: forming equations, formulae and sequences. Answers are checked as algebra, so equivalent forms count, with step-by-step help.
 
 ### Ratio & Proportion
 
