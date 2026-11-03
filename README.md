@@ -1,5 +1,13 @@
 # GCSE-Maths-Revision-Foundation-
 
-## Tools
+Open the revision cover page (`index.html`) to choose a topic. On GitHub Pages: https://sirlegend123.github.io/GCSE-Maths-Revision-Foundation-/
+
+## Topics
+
+### Algebra
+
+- Practice coming soon.
+
+### Ratio & Proportion
 
 - [Ratio Spiders](ratio-trainer/index.html): practise GCSE Foundation ratio sharing questions using the spider method (one leg for each part of the ratio). It has five levels: find the other share, totals, "more than" problems, three-part ratios, and mixed exam practice. Open `ratio-trainer/index.html` in a browser; no install is needed.
