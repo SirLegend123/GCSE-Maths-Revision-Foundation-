@@ -1,0 +1,494 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Ratio Table Trainer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700;800&display=swap">
+<style>
+/* Layout: one calm column. Question card on top, answer box and keypad underneath, the ratio table appears when help is asked for. */
+:root{
+  --font:'Lexend', Verdana, 'Trebuchet MS', system-ui, sans-serif;
+  --bg:#FBF6E4; --surface:#FFFFFF; --surface-2:#F3EEDB; --ink:#16213A; --ink-soft:#4E5873; --line:#DED6BC;
+  --sun:#F4BE1E; --sun-deep:#C99700; --sun-ink:#231A00;
+  --teal:#1B7F79; --teal-deep:#11605B; --teal-soft:#DDF0EE;
+  --good:#2C9659; --good-deep:#1F7343; --good-soft:#DFF3E6;
+  --warm:#D9822B; --warm-deep:#A9621C; --warm-soft:#FBE8D3;
+  --berry-soft:#EFE4F6; --on-accent:#FFFFFF; --shadow:rgba(22,33,58,.10);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#17150F; --surface:#1F222B; --surface-2:#2A2E39; --ink:#F2EFE3; --ink-soft:#B8B6AA; --line:#3A3F4C;
+    --sun:#F5C432; --sun-deep:#B88E0A; --sun-ink:#1E1600;
+    --teal:#4CC2B8; --teal-deep:#2E8E86; --teal-soft:#173836;
+    --good:#5DD08C; --good-deep:#3A9A62; --good-soft:#173526;
+    --warm:#F0A35E; --warm-deep:#B87535; --warm-soft:#3A2818;
+    --berry-soft:#2E2238; --on-accent:#0E1A14; --shadow:rgba(0,0,0,.35); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#17150F; --surface:#1F222B; --surface-2:#2A2E39; --ink:#F2EFE3; --ink-soft:#B8B6AA; --line:#3A3F4C;
+  --sun:#F5C432; --sun-deep:#B88E0A; --sun-ink:#1E1600;
+  --teal:#4CC2B8; --teal-deep:#2E8E86; --teal-soft:#173836;
+  --good:#5DD08C; --good-deep:#3A9A62; --good-soft:#173526;
+  --warm:#F0A35E; --warm-deep:#B87535; --warm-soft:#3A2818;
+  --berry-soft:#2E2238; --on-accent:#0E1A14; --shadow:rgba(0,0,0,.35); color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{font-family:var(--font); font-size:19px; line-height:1.6; background:var(--bg); color:var(--ink)}
+button,input{font:inherit; color:inherit}
+:focus-visible{outline:3px solid var(--teal); outline-offset:3px; border-radius:10px}
+.app{max-width:760px; margin:0 auto; padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); padding-block:14px 48px; display:flex; flex-direction:column; gap:18px}
+h1,h2{margin:0; line-height:1.25; text-wrap:balance; font-weight:800}
+h1{font-size:1.7em} h2{font-size:1.25em}
+p{margin:0}
+.muted{color:var(--ink-soft)} .small{font-size:.85em}
+.eyebrow{font-size:.72em; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--teal)}
+
+.bar{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+.brand{display:flex; align-items:center; gap:10px; font-weight:800; margin-right:auto; background:none; border:0; padding:4px; cursor:pointer; text-align:left}
+.logo{width:40px; height:40px; border-radius:12px; background:var(--sun); color:var(--sun-ink); display:grid; place-items:center; box-shadow:0 3px 0 var(--sun-deep); font-weight:800; font-size:.8em; flex:none}
+.iconbtn{width:46px; height:46px; border-radius:14px; border:2px solid var(--line); background:var(--surface); display:grid; place-items:center; cursor:pointer; flex:none}
+.iconbtn:hover{border-color:var(--teal)}
+
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:56px; padding:12px 22px; border-radius:18px; border:0; font-weight:700; cursor:pointer; background:var(--sun); color:var(--sun-ink); box-shadow:0 5px 0 var(--sun-deep); transition:transform .08s, box-shadow .08s}
+.btn:active{transform:translateY(4px); box-shadow:0 1px 0 var(--sun-deep)}
+.btn.teal{background:var(--teal); color:var(--on-accent); box-shadow:0 5px 0 var(--teal-deep)}
+.btn.teal:active{box-shadow:0 1px 0 var(--teal-deep)}
+.btn.good{background:var(--good); color:var(--on-accent); box-shadow:0 5px 0 var(--good-deep)}
+.btn.good:active{box-shadow:0 1px 0 var(--good-deep)}
+.btn.ghost{background:var(--surface); color:var(--ink); border:2px solid var(--line); box-shadow:0 4px 0 var(--line)}
+.btn.ghost:active{box-shadow:0 1px 0 var(--line)}
+.btn.sm{min-height:46px; padding:8px 16px; font-size:.9em; border-radius:14px}
+.btn:disabled{opacity:.5; cursor:not-allowed}
+.row{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+
+/* level picker */
+.levels{display:grid; grid-template-columns:repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap:14px}
+.level{display:flex; flex-direction:column; gap:8px; text-align:left; border:2px solid var(--line); background:var(--surface); border-radius:22px; padding:18px; cursor:pointer; box-shadow:0 5px 0 var(--shadow); transition:transform .1s}
+.level:hover{transform:translateY(-2px); border-color:var(--teal)}
+.level .top{display:flex; justify-content:space-between; gap:10px; align-items:center}
+.lvnum{width:40px; height:40px; border-radius:12px; display:grid; place-items:center; font-weight:800; background:var(--teal-soft); color:var(--teal); flex:none}
+.level b{font-size:1.05em}
+.level .eg{font-size:.82em; color:var(--ink-soft); background:var(--surface-2); border-radius:12px; padding:8px 12px}
+.best{font-size:.75em; font-weight:700; color:var(--ink-soft); white-space:nowrap}
+
+/* question */
+.playtop{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+.dots{display:flex; gap:6px; flex-wrap:wrap; flex:1; min-width:0}
+.dots i{width:16px; height:16px; border-radius:50%; background:var(--surface-2); border:2px solid var(--line)}
+.dots i.s3{background:var(--good); border-color:var(--good)}
+.dots i.s1{background:var(--sun); border-color:var(--sun-deep)}
+.dots i.s0{background:var(--warm); border-color:var(--warm)}
+.dots i.now{border-color:var(--ink)}
+.qcard{background:var(--surface); border:3px solid var(--ink); border-radius:26px; padding:24px; display:flex; flex-direction:column; gap:16px; box-shadow:0 8px 0 var(--ink)}
+.qhead{display:flex; gap:12px; justify-content:space-between; align-items:flex-start}
+.qhead > div{min-width:0}
+.qtext{font-size:1.3em; font-weight:600; line-height:1.5}
+.qtext .ask{display:block; font-weight:800; margin-top:6px}
+.answer{display:flex; gap:10px; align-items:stretch; flex-wrap:wrap}
+.field{flex:1; min-width:180px; display:flex; align-items:center; border:3px solid var(--line); border-radius:18px; background:var(--surface); padding:0 14px; gap:6px}
+.field:focus-within{border-color:var(--teal)}
+.field span{font-weight:800; font-size:1.3em; color:var(--ink-soft)}
+.field input{border:0; outline:0; background:transparent; font-size:1.5em; font-weight:800; width:100%; min-width:0; padding:10px 0; font-variant-numeric:tabular-nums}
+.keypad{display:grid; grid-template-columns:repeat(4, 1fr); gap:8px}
+.keypad button{min-height:56px; border-radius:14px; border:2px solid var(--line); background:var(--surface); font-weight:800; font-size:1.2em; cursor:pointer; box-shadow:0 3px 0 var(--line)}
+.keypad button:active{transform:translateY(2px); box-shadow:none}
+.keypad .wide{grid-column:span 2}
+.keypad .check{background:var(--teal); color:var(--on-accent); border-color:var(--teal); box-shadow:0 3px 0 var(--teal-deep)}
+
+/* ratio table, laid out like her exercise book */
+.rtwrap{overflow-x:auto}
+.rt{display:flex; align-items:center; gap:12px; width:max-content}
+.rt table{border-collapse:collapse; font-variant-numeric:tabular-nums}
+.rt th,.rt td{border:2px solid var(--ink); min-width:84px; padding:8px 14px; text-align:center; font-weight:800; font-size:1.05em}
+.rt th{background:var(--berry-soft); font-size:.85em}
+.rt td{background:var(--surface)}
+.rt td.known{background:var(--sun); color:var(--sun-ink)}
+.rt td.ask{background:var(--teal-soft); color:var(--teal)}
+.mult{font-weight:800; color:var(--teal); font-size:1.15em; white-space:nowrap}
+.help{background:var(--surface-2); border-radius:20px; padding:16px; display:flex; flex-direction:column; gap:12px}
+.steps{margin:0; padding-left:1.3em; display:flex; flex-direction:column; gap:4px}
+.feedback{border-radius:20px; padding:16px 18px; display:flex; flex-direction:column; gap:12px}
+.feedback.ok{background:var(--good-soft)}
+.feedback.no{background:var(--warm-soft)}
+.feedback .head{font-weight:800; font-size:1.1em}
+
+.tipcard{display:flex; gap:12px; align-items:flex-start; background:var(--teal-soft); border-radius:20px; padding:16px 18px}
+.score{font-size:3em; font-weight:800; line-height:1}
+.stars{display:flex; gap:8px; justify-content:center}
+.review{display:flex; flex-direction:column; gap:10px}
+.rv{background:var(--surface); border:2px solid var(--line); border-radius:16px; padding:12px 14px; display:flex; gap:12px; align-items:flex-start}
+.rv .pip{flex:none; width:30px; height:30px; border-radius:50%; display:grid; place-items:center; font-weight:800; font-size:.8em}
+.rv .pip.s3{background:var(--good); color:var(--on-accent)} .rv .pip.s1{background:var(--sun); color:var(--sun-ink)} .rv .pip.s0{background:var(--warm); color:#1E1000}
+.rv > div{min-width:0}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.shake{animation:shake .3s}
+@media (prefers-reduced-motion: reduce){*{animation:none!important; transition:none!important}}
+[hidden]{display:none!important}
+.rt{flex-wrap:wrap}
+@media (max-width:480px){ .qcard{padding:18px} .qtext{font-size:1.15em} .rt th,.rt td{min-width:0; padding:6px 8px; font-size:.95em} .rt th{font-size:.7em; padding:6px 5px} .rt{width:100%} .rt table{flex:1 1 220px; width:100%} .help{padding:12px} }
+</style>
+
+<div class="app" id="app"></div>
+
+<script>
+/* ---------------- helpers ---------------- */
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ri = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const gcd = (a, b) => b ? gcd(b, a % b) : a;
+const near = (x, y) => Math.abs(x - y) < 0.005;
+const num = v => { const r = Math.round(v * 100) / 100; return Number.isInteger(r) ? String(r) : r.toFixed(2).replace(/0$/, ""); };
+const LS = { get(k, d){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; } },
+             set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} } };
+function coprimePair(min = 1, max = 9){ let a, b; do { a = ri(min, max); b = ri(min, max); } while (a === b || gcd(a, b) !== 1); return [a, b]; }
+
+/* ---------------- contexts ---------------- */
+// Each context knows how to word a question. Units: pre for £, post for cm or sweets.
+const PAIRS = [["Amy","Ben"],["Cat","Dan"],["Priya","Tom"],["Kai","Lea"],["Jerry","Mick"],["Sam","Ella"],["Omar","Lily"],["Finn","Zara"],["Ruby","Jack"]];
+const TRIOS = [["Ali","Bo","Cy"],["Hassan","Jo","Kim"],["Mia","Noah","Ruby"],["Ella","Finn","Grace"]];
+const MONEY_MULTS = [2,3,4,5,6,8,10,12,15,20,25,30,40,50,60,100,150,200];
+
+function moneyCtx(n){
+  const names = n === 3 ? pick(TRIOS) : pick(PAIRS);
+  const list = n === 3 ? `${names[0]}, ${names[1]} and ${names[2]}` : `${names[0]} and ${names[1]}`;
+  return {
+    names, unit:{pre:"£", post:""}, mults: MONEY_MULTS,
+    setup: r => `${list} share some money in the ratio ${r.join(" : ")}.`,
+    setupTotal: (r, T) => `${list} share £${num(T)} in the ratio ${r.join(" : ")}.`,
+    known: (i, v) => `${names[i]} gets £${num(v)}.`,
+    diff: (p, q, d) => `${names[p]} gets £${num(d)} more than ${names[q]}.`,
+    askPart: i => `How much does ${names[i]} get?`,
+    askTotal: () => `How much money is shared altogether?`,
+    label: i => names[i], labelPoss: i => names[i] + "'s"
+  };
+}
+function ropeCtx(){
+  const thing = pick([{w:"rope", u:"cm", m:[2,3,4,5,6,7,8,9,10,12]}, {w:"ribbon", u:"cm", m:[3,4,5,6,8,10,12,15]}, {w:"plank of wood", u:"cm", m:[5,10,12,15,20]}]);
+  const names = ["Longer", "Shorter"];
+  return {
+    names, unit:{pre:"", post:thing.u}, mults: thing.m, bigFirst: true,
+    setup: r => `A ${thing.w} is cut into two pieces in the ratio ${r.join(" : ")}.`,
+    setupTotal: (r, T) => `A ${thing.w} ${num(T)} ${thing.u} long is cut into two pieces in the ratio ${r.join(" : ")}.`,
+    known: (i, v) => `The ${i === 0 ? "longer" : "shorter"} piece is ${num(v)} ${thing.u}.`,
+    diff: (p, q, d) => `The longer piece is ${num(d)} ${thing.u} longer than the shorter piece.`,
+    askPart: i => `How long is the ${i === 0 ? "longer" : "shorter"} piece?`,
+    askTotal: () => `How long was the ${thing.w} before it was cut?`,
+    label: i => `the ${i === 0 ? "longer" : "shorter"} piece`, labelPoss: i => `the ${i === 0 ? "longer" : "shorter"} piece's`
+  };
+}
+function countCtx(){
+  const set = pick([
+    {bag:"In a bag", a:"red sweets", b:"blue sweets", all:"sweets in the bag"},
+    {bag:"In a club", a:"boys", b:"girls", all:"people in the club"},
+    {bag:"In a car park", a:"cars", b:"vans", all:"vehicles in the car park"},
+    {bag:"In a fruit bowl", a:"apples", b:"oranges", all:"pieces of fruit in the bowl"}]);
+  const names = [set.a[0].toUpperCase() + set.a.slice(1), set.b[0].toUpperCase() + set.b.slice(1)];
+  const plain = [set.a, set.b];
+  return {
+    names, unit:{pre:"", post:""}, mults: [2,3,4,5,6,7,8,9,10,11,12],
+    setup: r => `${set.bag}, ${plain[0]} : ${plain[1]} = ${r.join(" : ")}.`,
+    setupTotal: (r, T) => `${set.bag} there are ${num(T)} ${set.all.split(" in ")[0]}. ${names[0]} : ${plain[1]} = ${r.join(" : ")}.`,
+    known: (i, v) => `There are ${num(v)} ${plain[i]}.`,
+    diff: (p, q, d) => `There are ${num(d)} more ${plain[p]} than ${plain[q]}.`,
+    askPart: i => `How many ${plain[i]} are there?`,
+    askTotal: () => `How many ${set.all} are there altogether?`,
+    label: i => `the ${plain[i]}`, labelPoss: i => `the ${plain[i]}`
+  };
+}
+
+function numbersCtx(){
+  const names = ["Smaller", "Larger"];
+  return {
+    names, unit:{pre:"", post:""}, mults:[2,3,4,5,6,7,8,9,10,12,15], smallFirst: true,
+    setup: r => `Two numbers are in the ratio ${r.join(" : ")}.`,
+    setupTotal: (r, T) => `Two numbers add up to ${num(T)}. They are in the ratio ${r.join(" : ")}.`,
+    known: (i, v) => `The ${i === 0 ? "smaller" : "larger"} number is ${num(v)}.`,
+    diff: (p, q, d) => `The larger number is ${num(d)} more than the smaller number.`,
+    askPart: i => `What is the ${i === 0 ? "smaller" : "larger"} number?`,
+    askTotal: () => `What is the total of the two numbers?`,
+    label: i => `the ${i === 0 ? "smaller" : "larger"} number`, labelPoss: i => `the ${i === 0 ? "smaller" : "larger"} number's`
+  };
+}
+
+/* ---------------- question builder ---------------- */
+// kind: "part" (one share known, find another), "toTotal" (one share known, find the total),
+//       "fromTotal" (total known, find a share), "diff" (difference known, find a share or the total)
+function build(kind, ctx, r, opts = {}){
+  const sum = r.reduce((a, b) => a + b, 0);
+  const m = pick(ctx.mults);
+  const shares = r.map(x => x * m), T = sum * m;
+  const cols = ctx.names.slice(0, r.length);
+  const q = {kind, r, sum, m, shares, T, unit: ctx.unit, cols, mistakes: [], lines: []};
+  const fmt = v => (ctx.unit.pre || "") + num(v) + (ctx.unit.post ? " " + ctx.unit.post : "");
+  q.fmt = fmt;
+
+  if (kind === "part"){
+    let k = opts.k ?? ri(0, r.length - 1), j; do { j = ri(0, r.length - 1); } while (j === k);
+    q.k = k; q.j = j; q.extra = "Total"; q.extraRatio = sum;
+    q.lines = [ctx.setup(r), ctx.known(k, shares[k])]; q.ask = ctx.askPart(j);
+    q.answer = shares[j];
+    const v = shares[k];
+    q.mistakes = [
+      [v / sum * r[j], `It looks like ${fmt(v)} went in the Total column. ${fmt(v)} is only ${ctx.labelPoss(k)} share, so it goes in the ${cols[k]} column.`],
+      [m, `${fmt(m)} is one part (the multiplier). Now multiply it by ${r[j]} for ${ctx.label(j)}.`],
+      [v / r[j] * r[k], `It looks like ${fmt(v)} went in the wrong column. Read it again: whose share is ${fmt(v)}?`],
+      [v * r[j], `You multiplied ${fmt(v)} by ${r[j]}. First divide ${fmt(v)} by ${r[k]} to find one part.`],
+      [T, `${fmt(T)} is the total. The question asks for ${ctx.label(j)} only.`],
+      [v, `${fmt(v)} is ${ctx.labelPoss(k)} share. The question asks about ${ctx.label(j)}.`]
+    ];
+    q.steps = [`${fmt(v)} is ${ctx.labelPoss(k)} share. It goes in the ${cols[k]} column.`, `Multiplier: ${num(v)} ÷ ${r[k]} = ${num(m)}`, `${cols[j]}: ${r[j]} × ${num(m)} = ${fmt(q.answer)}`];
+  }
+  if (kind === "toTotal"){
+    const k = ri(0, r.length - 1); q.k = k; q.j = "extra"; q.extra = "Total"; q.extraRatio = sum;
+    q.lines = [ctx.setup(r), ctx.known(k, shares[k])]; q.ask = ctx.askTotal();
+    q.answer = T; const v = shares[k], other = T - v;
+    q.mistakes = [
+      [other, `${fmt(other)} is the other share. The question asks for the total, so add the shares, or multiply ${sum} by the multiplier.`],
+      [m, `${fmt(m)} is one part. The total is ${sum} parts.`],
+      [v * sum, `You multiplied ${fmt(v)} by ${sum}. First divide ${fmt(v)} by ${r[k]} to find one part.`],
+      [v, `${fmt(v)} is just ${ctx.labelPoss(k)} share. The question asks for the total.`]
+    ];
+    q.steps = [`Total parts: ${r.join(" + ")} = ${sum}`, `${fmt(v)} goes in the ${cols[k]} column.`, `Multiplier: ${num(v)} ÷ ${r[k]} = ${num(m)}`, `Total: ${sum} × ${num(m)} = ${fmt(T)}`];
+  }
+  if (kind === "fromTotal"){
+    const j = ri(0, r.length - 1); q.k = "extra"; q.j = j; q.extra = "Total"; q.extraRatio = sum;
+    q.lines = [ctx.setupTotal(r, T)]; q.ask = ctx.askPart(j);
+    q.answer = shares[j];
+    q.mistakes = [
+      [m, `${fmt(m)} is one part. Now multiply it by ${r[j]} for ${ctx.label(j)}.`],
+      [T / r[j], `You divided by ${r[j]}. Divide the total by all the parts: ${r.join(" + ")} = ${sum}.`],
+      [T - shares[j], `That is the other share. Check which one the question asks for.`],
+      [T, `${fmt(T)} is the total. The question asks for ${ctx.label(j)} only.`]
+    ];
+    q.steps = [`Total parts: ${r.join(" + ")} = ${sum}`, `${fmt(T)} goes in the Total column.`, `Multiplier: ${num(T)} ÷ ${sum} = ${num(m)}`, `${cols[j]}: ${r[j]} × ${num(m)} = ${fmt(q.answer)}`];
+  }
+  if (kind === "diff"){
+    const p = opts.p ?? 0, qq = opts.q ?? 1, dParts = r[p] - r[qq], d = dParts * m;
+    q.p = p; q.qq = qq; q.k = "extra"; q.extra = "Difference"; q.extraRatio = dParts;
+    const askTotal = opts.askTotal === true;
+    let j = opts.j ?? (askTotal ? "total" : ri(0, r.length - 1));
+    q.j = j;
+    q.lines = [ctx.setup(r), ctx.diff(p, qq, d)];
+    q.ask = j === "total" ? ctx.askTotal() : ctx.askPart(j);
+    q.answer = j === "total" ? T : shares[j];
+    q.showTotal = j === "total";
+    const want = j === "total" ? sum : r[j], wantLabel = j === "total" ? "the total" : ctx.label(j);
+    q.mistakes = [
+      [d / sum * want, `It looks like ${fmt(d)} went in the Total column. "More than" means it is the difference, so it goes in the Difference column.`],
+      [d / r[p] * want, `It looks like ${fmt(d)} went in the ${cols[p]} column. ${fmt(d)} is how many MORE, so it goes in the Difference column.`],
+      [m, `${fmt(m)} is one part (the multiplier). Now multiply it by ${want} for ${wantLabel}.`],
+      [d, `${fmt(d)} is the difference. The question asks for ${wantLabel}.`],
+      [d * want, `You multiplied ${fmt(d)} by ${want}. First divide ${fmt(d)} by the difference in the ratio, ${dParts}.`]
+    ];
+    if (j !== "total") q.mistakes.push([T, `${fmt(T)} is the total. The question asks for ${wantLabel} only.`]);
+    q.steps = [`Difference in the ratio: ${r[p]} − ${r[qq]} = ${dParts}`, `${fmt(d)} is the difference. It goes in the Difference column.`, `Multiplier: ${num(d)} ÷ ${dParts} = ${num(m)}`,
+      j === "total" ? `Total parts: ${r.join(" + ")} = ${sum}, so the total is ${sum} × ${num(m)} = ${fmt(T)}` : `${cols[j]}: ${r[j]} × ${num(m)} = ${fmt(q.answer)}`];
+    q.dValue = d;
+  }
+  q.mistakes = q.mistakes.filter(([v]) => !near(v, q.answer));
+  return q;
+}
+
+/* ---------------- levels ---------------- */
+function twoPartRatio(ctx){ let r = coprimePair(1, 9); if (ctx.bigFirst && r[0] < r[1]) r = [r[1], r[0]]; if (ctx.smallFirst && r[0] > r[1]) r = [r[1], r[0]]; return r; }
+function anyCtx(){ return pick([moneyCtx(2), moneyCtx(2), ropeCtx(), countCtx(), numbersCtx()]); }
+const LEVELS = [
+  {id:"L1", name:"Find the other share", eg:"Jerry and Mick share money in the ratio 2 : 3. Mick gets £900. How much does Jerry get?",
+   gen(){ const c = anyCtx(); return build("part", c, twoPartRatio(c)); }},
+  {id:"L2", name:"Find the total, or share a total", eg:"Two numbers are in the ratio 3 : 5. The smaller is 24. What is the total?",
+   gen(){ const c = anyCtx(); return build(pick(["toTotal", "fromTotal", "toTotal"]), c, twoPartRatio(c)); }},
+  {id:"L3", name:"'More than' problems", eg:"Kai and Lea share money in the ratio 7 : 3. Kai gets £20 more than Lea. How much does Kai get?",
+   gen(){
+     const c = anyCtx(); let r = coprimePair(1, 9); if (r[0] < r[1]) r = [r[1], r[0]];
+     if (c.smallFirst) return build("diff", c, [r[1], r[0]], {p:1, q:0, askTotal: Math.random() < .25});
+     return build("diff", c, r, {p:0, q:1, askTotal: Math.random() < .25});
+   }},
+  {id:"L4", name:"Three people", eg:"Ali, Bo and Cy share money in the ratio 2 : 5 : 3. Bo gets £12 more than Cy. How much does Ali get?",
+   gen(){
+     const c = moneyCtx(3); let r; do { r = [ri(1, 9), ri(1, 9), ri(1, 9)]; } while (new Set(r).size < 3);
+     if (Math.random() < .55){ const idx = [0,1,2].sort((a, b) => r[b] - r[a]); const p = idx[0], qq = Math.random() < .5 ? idx[1] : idx[2];
+       const others = [0,1,2].filter(i => i !== p && i !== qq); return build("diff", c, r, {p, q:qq, j: Math.random() < .7 ? others[0] : p}); }
+     return build("part", c, r);
+   }},
+  {id:"L5", name:"Mixed exam practice", eg:"A mix of every type, like a real exam paper.",
+   gen(){ return pick(LEVELS.slice(0, 4)).gen(); }}
+];
+
+/* ---------------- state ---------------- */
+const ROUND = 10;
+const S = {view:"home", level:null, qs:[], i:0, results:[], tries:0, help:0, done:false, msg:null, best: LS.get("rtt-best", {})};
+
+function newRound(level){
+  S.level = level; S.qs = []; const seen = new Set();
+  while (S.qs.length < ROUND){ const q = level.gen(); const key = q.lines.join() + q.ask; if (!seen.has(key)){ seen.add(key); S.qs.push(q); } }
+  S.i = 0; S.results = []; resetQ(); S.view = "play"; render(); focusInput();
+}
+function resetQ(){ S.tries = 0; S.help = 0; S.done = false; S.msg = null; S.value = ""; }
+
+/* ---------------- ratio table ---------------- */
+function tableHTML(q, stage){
+  // stage 1: headers + ratio row; 2: known value placed; 3: multiplier; 4: everything
+  const n = q.r.length, headers = [...q.cols, q.extra];
+  const ratio = [...q.r, q.extraRatio];
+  const amounts = [...q.shares, q.kind === "diff" ? q.dValue : q.T];
+  const knownIdx = q.k === "extra" ? n : q.k;
+  const askIdx = q.j === "extra" ? n : q.j === "total" ? -1 : q.j;
+  if (q.showTotal) { headers.push("Total"); ratio.push(q.sum); amounts.push(q.T); }
+  const askCol = q.j === "total" ? headers.length - 1 : askIdx;
+  const cells = amounts.map((v, i) => {
+    if (stage >= 4) return `<td class="${i === knownIdx ? "known" : i === askCol ? "ask" : ""}">${esc(num(v))}</td>`;
+    if (i === knownIdx && stage >= 2) return `<td class="known">${esc(num(v))}</td>`;
+    if (i === askCol) return `<td class="ask">?</td>`;
+    return `<td></td>`;
+  });
+  return `<div class="rtwrap"><div class="rt"><table>
+    <thead><tr>${headers.map(h => `<th>${esc(h)}</th>`).join("")}</tr></thead>
+    <tbody><tr>${ratio.map(v => `<td>${v}</td>`).join("")}</tr><tr>${cells.join("")}</tr></tbody></table>
+    ${stage >= 3 ? `<span class="mult">× ${esc(num(q.m))}</span>` : ""}</div></div>`;
+}
+const HELP_TEXT = [
+  "",
+  "Step 1: draw the ratio table. The ratio goes in the top row.",
+  "Step 2: put the number you know in the right column. It is highlighted.",
+  "Step 3: find the multiplier: divide the number you know by the ratio number above it. Then multiply."
+];
+
+/* ---------------- views ---------------- */
+function bar(){
+  return `<header class="bar"><button class="brand" data-act="home" aria-label="Home"><span class="logo">2:3</span><span>Ratio Table Trainer</span></button>
+    <button class="iconbtn" data-act="speak" aria-label="Read the question aloud" title="Read aloud" ${S.view === "play" ? "" : "hidden"}>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12"/></svg></button></header>`;
+}
+function homeView(){
+  return `${bar()}
+  <div style="display:flex;flex-direction:column;gap:8px"><h1>Pick a level</h1>
+  <p class="muted">Ten questions each time, all new. Type your answer and press Check. If you get stuck, press Help me and the ratio table builds one step at a time.</p></div>
+  <div class="levels">${LEVELS.map((l, i) => `<button class="level" data-act="level" data-i="${i}">
+    <span class="top"><span class="lvnum">${i + 1}</span><span class="best">${S.best[l.id] != null ? "Best: " + S.best[l.id] + " / " + ROUND * 3 + " stars" : "Not played yet"}</span></span>
+    <b>${esc(l.name)}</b><span class="eg">${esc(l.eg)}</span></button>`).join("")}</div>
+  <div class="tipcard"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex:none;margin-top:3px"><path d="M9 18h6M10 21h4M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z"/></svg>
+  <p><b>Ask yourself every time:</b> is the number I know ONE person's share, ALL of it, or the DIFFERENCE? That tells you which column it goes in.</p></div>`;
+}
+function dots(){
+  return `<div class="dots" aria-hidden="true">${S.qs.map((_, i) => `<i class="${i < S.results.length ? "s" + S.results[i] : ""} ${i === S.i ? "now" : ""}"></i>`).join("")}</div>`;
+}
+function playView(){
+  const q = S.qs[S.i];
+  const u = q.unit;
+  const solved = S.done;
+  return `${bar()}
+  <div class="playtop"><button class="btn ghost sm" data-act="home">Stop</button>${dots()}<span class="small muted">Question ${S.i + 1} of ${ROUND}</span></div>
+  <div class="qcard">
+    <div class="qhead"><div><span class="eyebrow">${esc(S.level.name)}</span>
+      <p class="qtext">${q.lines.map(esc).join(" ")}<span class="ask">${esc(q.ask)}</span></p></div></div>
+    ${S.help > 0 && !solved ? `<div class="help"><p class="small"><b>${esc(HELP_TEXT[S.help])}</b></p>${tableHTML(q, S.help)}
+        ${S.help < 3 ? `<div><button class="btn ghost sm" data-act="help">Next step</button></div>` : ""}</div>` : ""}
+    ${!solved ? `<div class="answer"><label class="field" for="ans">${u.pre ? `<span>${esc(u.pre)}</span>` : ""}<input id="ans" inputmode="decimal" autocomplete="off" placeholder="Your answer" aria-label="Your answer" value="${esc(S.value)}">${u.post ? `<span>${esc(u.post)}</span>` : ""}</label></div>
+      <div class="keypad" role="group" aria-label="Number keys">
+        ${["7","8","9","⌫","4","5","6",".","1","2","3","0"].map(k => `<button data-act="key" data-k="${k}" aria-label="${k === "⌫" ? "Delete" : k}">${k}</button>`).join("")}
+        ${S.help < 3 ? `<button class="wide" data-act="help">Help me</button>` : `<button class="wide" data-act="clear">Clear</button>`}<button class="wide check" data-act="check">Check</button>
+      </div>` : ""}
+    ${S.msg ? feedbackHTML(q) : ""}
+  </div>`;
+}
+function feedbackHTML(q){
+  const m = S.msg;
+  if (m.type === "nan") return `<div class="feedback no" role="alert"><span class="head">Type a number</span><p>For example: 60. You do not need to type the £ or cm.</p></div>`;
+  if (m.type === "wrong") return `<div class="feedback no" role="alert"><span class="head">Not yet. Have another go.</span><p>${esc(m.text)}</p></div>`;
+  const ok = m.type === "right";
+  const stars = S.results[S.i];
+  return `<div class="feedback ${ok ? "ok" : "no"}" role="status">
+    <span class="head">${ok ? (stars === 3 ? "Yes! First time, no help." : "Yes, that's right.") : "The answer is " + esc(q.fmt(q.answer)) + "."}</span>
+    ${!ok && m.text ? `<p>${esc(m.text)}</p>` : ""}
+    ${tableHTML(q, 4)}
+    <ol class="steps">${q.steps.map(s => `<li>${esc(s)}</li>`).join("")}</ol>
+    <div class="row"><button class="btn ${ok ? "good" : "teal"}" data-act="next" id="nextBtn">${S.i + 1 < ROUND ? "Next question" : "See my score"}</button></div>
+  </div>`;
+}
+function endView(){
+  const total = S.results.reduce((a, b) => a + b, 0), max = ROUND * 3;
+  const firstTime = S.results.filter(s => s === 3).length, correct = S.results.filter(s => s > 0).length;
+  const prev = S.best[S.level.id];
+  const isBest = prev == null || total > prev;
+  if (isBest){ S.best[S.level.id] = total; LS.set("rtt-best", S.best); }
+  const big = total / max >= .8 ? 3 : total / max >= .5 ? 2 : 1;
+  const star = f => `<svg width="56" height="56" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4L2.8 9.5l6.4-.8z" fill="${f}" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>`;
+  return `${bar()}
+  <div class="qcard" style="align-items:center;text-align:center">
+    <div class="stars">${[0,1,2].map(i => star(i < big ? "var(--sun)" : "var(--surface-2)")).join("")}</div>
+    <p class="score">${total} <span class="small muted">/ ${max} stars</span></p>
+    <p><b>${correct} of ${ROUND}</b> right, and <b>${firstTime}</b> first time with no help.${isBest && prev != null ? " That is a new best." : ""}</p>
+    <p class="small muted">3 stars: right first time with no help. 1 star: right after help or a second go.</p>
+    <div class="row" style="justify-content:center"><button class="btn" data-act="again">Play again</button><button class="btn ghost" data-act="home">Change level</button></div>
+  </div>
+  <h2>Your questions</h2>
+  <div class="review">${S.qs.map((q, i) => `<div class="rv"><span class="pip s${S.results[i]}">${S.results[i] === 3 ? "3★" : S.results[i] === 1 ? "1★" : "–"}</span>
+    <div><p class="small">${esc(q.lines.join(" "))} ${esc(q.ask)}</p><p class="small"><b>Answer: ${esc(q.fmt(q.answer))}</b></p></div></div>`).join("")}</div>`;
+}
+
+function render(){
+  const app = document.getElementById("app");
+  app.innerHTML = S.view === "play" ? playView() : S.view === "end" ? endView() : homeView();
+}
+function focusInput(){
+  // Only focus on devices with a real keyboard, so phones do not pop up their own keyboard over the keypad.
+  if (matchMedia("(pointer: fine)").matches){ const el = document.getElementById("ans"); if (el){ el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }
+}
+
+/* ---------------- checking ---------------- */
+function check(){
+  const q = S.qs[S.i], raw = (document.getElementById("ans")?.value || "").replace(/[£,\s]|cm|m$/gi, "");
+  S.value = document.getElementById("ans")?.value || "";
+  const v = parseFloat(raw);
+  if (!/^-?\d*\.?\d+$/.test(raw) || isNaN(v)){ S.msg = {type:"nan"}; render(); shakeInput(); return; }
+  if (near(v, q.answer)){
+    S.results[S.i] = (S.tries === 0 && S.help === 0) ? 3 : 1;
+    S.done = true; S.msg = {type:"right"}; render(); document.getElementById("nextBtn")?.focus(); return;
+  }
+  S.tries++;
+  const hit = q.mistakes.find(([mv]) => near(mv, v));
+  if (S.tries >= 2){
+    S.results[S.i] = 0; S.done = true; S.msg = {type:"reveal", text: hit ? hit[1] : ""}; render(); document.getElementById("nextBtn")?.focus(); return;
+  }
+  S.msg = {type:"wrong", text: hit ? hit[1] : "Check which column the number you know goes in. Press Help me to see the ratio table."};
+  S.value = ""; render(); shakeInput(); focusInput();
+}
+function shakeInput(){ const f = document.querySelector(".field"); if (f){ f.classList.add("shake"); setTimeout(() => f.classList.remove("shake"), 350); } }
+function speak(){
+  try { const q = S.qs[S.i]; const ss = window.speechSynthesis; if (!ss) return; ss.cancel();
+    const u = new SpeechSynthesisUtterance((q.lines.join(" ") + " " + q.ask).replace(/£(\d+(\.\d+)?)/g, "$1 pounds").replace(/ : /g, " to "));
+    u.lang = "en-GB"; u.rate = .9; const voice = ss.getVoices().find(x => /en-GB/i.test(x.lang)); if (voice) u.voice = voice; ss.speak(u); } catch(e){}
+}
+
+/* ---------------- events ---------------- */
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  const act = b.dataset.act;
+  if (act === "home"){ S.view = "home"; render(); window.scrollTo(0, 0); }
+  else if (act === "level") newRound(LEVELS[Number(b.dataset.i)]);
+  else if (act === "again") newRound(S.level);
+  else if (act === "speak") speak();
+  else if (act === "help"){ S.value = document.getElementById("ans")?.value || ""; S.help = Math.min(3, S.help + 1); if (S.msg && S.msg.type !== "wrong") S.msg = null; render(); }
+  else if (act === "check") check();
+  else if (act === "next"){ if (S.i + 1 < ROUND){ S.i++; resetQ(); render(); window.scrollTo(0, 0); focusInput(); } else { S.view = "end"; render(); window.scrollTo(0, 0); } }
+  else if (act === "key" || act === "clear"){
+    const el = document.getElementById("ans"); if (!el) return;
+    const k = b.dataset.k;
+    if (act === "clear") el.value = "";
+    else if (k === "⌫") el.value = el.value.slice(0, -1);
+    else if (!(k === "." && el.value.includes("."))) el.value += k;
+    S.value = el.value;
+  }
+});
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter" && S.view === "play"){
+    if (S.done){ e.preventDefault(); document.getElementById("nextBtn")?.click(); }
+    else if (e.target.id === "ans"){ e.preventDefault(); check(); }
+  }
+});
+document.addEventListener("input", e => { if (e.target.id === "ans") S.value = e.target.value; });
+
+render();
+</script>
+
+</body></html>
