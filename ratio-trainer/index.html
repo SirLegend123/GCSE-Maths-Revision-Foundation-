@@ -1,10 +1,10 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Ratio Table Trainer</title>
+<title>Ratio Spiders</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700;800&display=swap">
 <style>
-/* Layout: one calm column. Question card on top, answer box and keypad underneath, the ratio table appears when help is asked for. */
+/* Layout: one calm column. Question card on top, answer box and keypad underneath, the spider is drawn when help is asked for. */
 :root{
   --font:'Lexend', Verdana, 'Trebuchet MS', system-ui, sans-serif;
   --bg:#FBF6E4; --surface:#FFFFFF; --surface-2:#F3EEDB; --ink:#16213A; --ink-soft:#4E5873; --line:#DED6BC;
@@ -95,16 +95,22 @@ p{margin:0}
 .keypad .wide{grid-column:span 2}
 .keypad .check{background:var(--teal); color:var(--on-accent); border-color:var(--teal); box-shadow:0 3px 0 var(--teal-deep)}
 
-/* ratio table, laid out like her exercise book */
-.rtwrap{overflow-x:auto}
-.rt{display:flex; align-items:center; gap:12px; width:max-content}
-.rt table{border-collapse:collapse; font-variant-numeric:tabular-nums}
-.rt th,.rt td{border:2px solid var(--ink); min-width:84px; padding:8px 14px; text-align:center; font-weight:800; font-size:1.05em}
-.rt th{background:var(--berry-soft); font-size:.85em}
-.rt td{background:var(--surface)}
-.rt td.known{background:var(--sun); color:var(--sun-ink)}
-.rt td.ask{background:var(--teal-soft); color:var(--teal)}
-.mult{font-weight:800; color:var(--teal); font-size:1.15em; white-space:nowrap}
+/* spider diagram, drawn the way she draws it: a body with one leg for each part */
+.spider{display:block; width:100%; max-width:420px; height:auto; margin:0 auto}
+.spider .bodyshape{fill:var(--surface); stroke:var(--ink); stroke-width:3}
+.spider .leg{stroke:var(--ink); stroke-width:3; stroke-linecap:round; fill:none}
+.spider .leg.known{stroke:var(--sun-deep); stroke-width:5}
+.spider .leg.extra{stroke:var(--warm); stroke-width:5}
+.spider .leg.ask{stroke:var(--teal); stroke-width:4}
+.spider text{fill:var(--ink); font-family:var(--font); font-weight:700; font-variant-numeric:tabular-nums}
+.spider .lbl{font-size:17px}
+.spider .nm{font-size:18px; font-weight:800}
+.spider .amt{font-size:20px; font-weight:800}
+.spider .amt.ask{fill:var(--teal)}
+.spider .pill{fill:var(--sun)}
+.spider .pill-t{fill:var(--sun-ink)}
+.spider .extra-t{fill:var(--warm-deep)}
+.caps{margin:0; padding-left:1.3em; display:flex; flex-direction:column; gap:2px; font-weight:600}
 .help{background:var(--surface-2); border-radius:20px; padding:16px; display:flex; flex-direction:column; gap:12px}
 .steps{margin:0; padding-left:1.3em; display:flex; flex-direction:column; gap:4px}
 .feedback{border-radius:20px; padding:16px 18px; display:flex; flex-direction:column; gap:12px}
@@ -124,8 +130,7 @@ p{margin:0}
 .shake{animation:shake .3s}
 @media (prefers-reduced-motion: reduce){*{animation:none!important; transition:none!important}}
 [hidden]{display:none!important}
-.rt{flex-wrap:wrap}
-@media (max-width:480px){ .qcard{padding:18px} .qtext{font-size:1.15em} .rt th,.rt td{min-width:0; padding:6px 8px; font-size:.95em} .rt th{font-size:.7em; padding:6px 5px} .rt{width:100%} .rt table{flex:1 1 220px; width:100%} .help{padding:12px} }
+@media (max-width:480px){ .qcard{padding:18px} .qtext{font-size:1.15em} .help{padding:12px} }
 </style>
 
 <div class="app" id="app"></div>
@@ -213,6 +218,8 @@ function numbersCtx(){
 /* ---------------- question builder ---------------- */
 // kind: "part" (one share known, find another), "toTotal" (one share known, find the total),
 //       "fromTotal" (total known, find a share), "diff" (difference known, find a share or the total)
+const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
+const legs = x => x === 1 ? "1 leg" : x + " legs";
 function build(kind, ctx, r, opts = {}){
   const sum = r.reduce((a, b) => a + b, 0);
   const m = pick(ctx.mults);
@@ -221,70 +228,74 @@ function build(kind, ctx, r, opts = {}){
   const q = {kind, r, sum, m, shares, T, unit: ctx.unit, cols, mistakes: [], lines: []};
   const fmt = v => (ctx.unit.pre || "") + num(v) + (ctx.unit.post ? " " + ctx.unit.post : "");
   q.fmt = fmt;
+  const lab = i => ctx.label(i), Lab = i => cap(ctx.label(i));
+  q.legsLine = r.map((x, i) => `${Lab(i)}: ${legs(x)}`).join(", ");
+  const partLine = j => `${Lab(j)}: ${legs(r[j])}, so ${r[j]} × ${fmt(m)} = ${fmt(shares[j])}`;
+  const totalLine = () => `All the legs: ${r.join(" + ")} = ${sum}, so ${sum} × ${fmt(m)} = ${fmt(T)}`;
 
-  if (kind === "part"){
-    let k = opts.k ?? ri(0, r.length - 1), j; do { j = ri(0, r.length - 1); } while (j === k);
-    q.k = k; q.j = j; q.extra = "Total"; q.extraRatio = sum;
-    q.lines = [ctx.setup(r), ctx.known(k, shares[k])]; q.ask = ctx.askPart(j);
-    q.answer = shares[j];
+  if (kind === "part" || kind === "toTotal"){
+    const k = kind === "part" ? (opts.k ?? ri(0, r.length - 1)) : ri(0, r.length - 1);
     const v = shares[k];
-    q.mistakes = [
-      [v / sum * r[j], `It looks like ${fmt(v)} went in the Total column. ${fmt(v)} is only ${ctx.labelPoss(k)} share, so it goes in the ${cols[k]} column.`],
-      [m, `${fmt(m)} is one part (the multiplier). Now multiply it by ${r[j]} for ${ctx.label(j)}.`],
-      [v / r[j] * r[k], `It looks like ${fmt(v)} went in the wrong column. Read it again: whose share is ${fmt(v)}?`],
-      [v * r[j], `You multiplied ${fmt(v)} by ${r[j]}. First divide ${fmt(v)} by ${r[k]} to find one part.`],
-      [T, `${fmt(T)} is the total. The question asks for ${ctx.label(j)} only.`],
-      [v, `${fmt(v)} is ${ctx.labelPoss(k)} share. The question asks about ${ctx.label(j)}.`]
-    ];
-    q.steps = [`${fmt(v)} is ${ctx.labelPoss(k)} share. It goes in the ${cols[k]} column.`, `Multiplier: ${num(v)} ÷ ${r[k]} = ${num(m)}`, `${cols[j]}: ${r[j]} × ${num(m)} = ${fmt(q.answer)}`];
-  }
-  if (kind === "toTotal"){
-    const k = ri(0, r.length - 1); q.k = k; q.j = "extra"; q.extra = "Total"; q.extraRatio = sum;
-    q.lines = [ctx.setup(r), ctx.known(k, shares[k])]; q.ask = ctx.askTotal();
-    q.answer = T; const v = shares[k], other = T - v;
-    q.mistakes = [
-      [other, `${fmt(other)} is the other share. The question asks for the total, so add the shares, or multiply ${sum} by the multiplier.`],
-      [m, `${fmt(m)} is one part. The total is ${sum} parts.`],
-      [v * sum, `You multiplied ${fmt(v)} by ${sum}. First divide ${fmt(v)} by ${r[k]} to find one part.`],
-      [v, `${fmt(v)} is just ${ctx.labelPoss(k)} share. The question asks for the total.`]
-    ];
-    q.steps = [`Total parts: ${r.join(" + ")} = ${sum}`, `${fmt(v)} goes in the ${cols[k]} column.`, `Multiplier: ${num(v)} ÷ ${r[k]} = ${num(m)}`, `Total: ${sum} × ${num(m)} = ${fmt(T)}`];
+    q.k = k; q.lines = [ctx.setup(r), ctx.known(k, v)];
+    q.knownLine = `${Lab(k)}: ${legs(r[k])} = ${fmt(v)}`;
+    q.oneLeg = `1 leg = ${fmt(v)} ÷ ${r[k]} = ${fmt(m)}`;
+    if (kind === "part"){
+      let j; do { j = ri(0, r.length - 1); } while (j === k);
+      q.j = j; q.ask = ctx.askPart(j); q.answer = shares[j]; q.finalLine = partLine(j);
+      q.mistakes = [
+        [v / sum * r[j], `It looks like ${fmt(v)} was shared between ALL the legs. ${fmt(v)} is only ${ctx.labelPoss(k)} share, so share it between ${ctx.labelPoss(k)} ${legs(r[k])}.`],
+        [m, `${fmt(m)} is what 1 leg is worth. ${Lab(j)} has ${legs(r[j])}, so multiply by ${r[j]}.`],
+        [v / r[j] * r[k], `It looks like ${fmt(v)} was shared between the wrong legs. ${fmt(v)} belongs to ${lab(k)}, so share it between ${ctx.labelPoss(k)} ${legs(r[k])}.`],
+        [v * r[j], `You multiplied ${fmt(v)} by ${r[j]}. First share ${fmt(v)} between ${ctx.labelPoss(k)} ${legs(r[k])} to find what 1 leg is worth.`],
+        [T, `${fmt(T)} is all the legs. The question asks for ${lab(j)} only.`],
+        [v, `${fmt(v)} is ${ctx.labelPoss(k)} share. The question asks about ${lab(j)}.`]
+      ];
+    } else {
+      q.j = "all"; q.ask = ctx.askTotal(); q.answer = T; q.finalLine = totalLine();
+      const other = T - v;
+      q.mistakes = [
+        [other, `${fmt(other)} is the other share. The question asks for all of it, so count ALL the legs: ${r.join(" + ")} = ${sum}.`],
+        [m, `${fmt(m)} is what 1 leg is worth. The spider has ${sum} legs altogether.`],
+        [v * sum, `You multiplied ${fmt(v)} by ${sum}. First share ${fmt(v)} between ${ctx.labelPoss(k)} ${legs(r[k])} to find what 1 leg is worth.`],
+        [v, `${fmt(v)} is just ${ctx.labelPoss(k)} share. The question asks for all of it.`]
+      ];
+    }
   }
   if (kind === "fromTotal"){
-    const j = ri(0, r.length - 1); q.k = "extra"; q.j = j; q.extra = "Total"; q.extraRatio = sum;
-    q.lines = [ctx.setupTotal(r, T)]; q.ask = ctx.askPart(j);
-    q.answer = shares[j];
+    const j = ri(0, r.length - 1); q.k = "all"; q.j = j;
+    q.lines = [ctx.setupTotal(r, T)]; q.ask = ctx.askPart(j); q.answer = shares[j];
+    q.knownLine = `All the legs: ${r.join(" + ")} = ${legs(sum)} = ${fmt(T)}`;
+    q.oneLeg = `1 leg = ${fmt(T)} ÷ ${sum} = ${fmt(m)}`;
+    q.finalLine = partLine(j);
     q.mistakes = [
-      [m, `${fmt(m)} is one part. Now multiply it by ${r[j]} for ${ctx.label(j)}.`],
-      [T / r[j], `You divided by ${r[j]}. Divide the total by all the parts: ${r.join(" + ")} = ${sum}.`],
+      [m, `${fmt(m)} is what 1 leg is worth. ${Lab(j)} has ${legs(r[j])}, so multiply by ${r[j]}.`],
+      [T / r[j], `You shared it between ${legs(r[j])}. ${fmt(T)} is ALL of it, so share it between all the legs: ${r.join(" + ")} = ${sum}.`],
       [T - shares[j], `That is the other share. Check which one the question asks for.`],
-      [T, `${fmt(T)} is the total. The question asks for ${ctx.label(j)} only.`]
+      [T, `${fmt(T)} is all of it. The question asks for ${lab(j)} only.`]
     ];
-    q.steps = [`Total parts: ${r.join(" + ")} = ${sum}`, `${fmt(T)} goes in the Total column.`, `Multiplier: ${num(T)} ÷ ${sum} = ${num(m)}`, `${cols[j]}: ${r[j]} × ${num(m)} = ${fmt(q.answer)}`];
   }
   if (kind === "diff"){
     const p = opts.p ?? 0, qq = opts.q ?? 1, dParts = r[p] - r[qq], d = dParts * m;
-    q.p = p; q.qq = qq; q.k = "extra"; q.extra = "Difference"; q.extraRatio = dParts;
-    const askTotal = opts.askTotal === true;
-    let j = opts.j ?? (askTotal ? "total" : ri(0, r.length - 1));
+    q.p = p; q.qq = qq; q.k = "extra"; q.dParts = dParts; q.dValue = d;
+    const j = opts.j ?? (opts.askTotal === true ? "all" : ri(0, r.length - 1));
     q.j = j;
     q.lines = [ctx.setup(r), ctx.diff(p, qq, d)];
-    q.ask = j === "total" ? ctx.askTotal() : ctx.askPart(j);
-    q.answer = j === "total" ? T : shares[j];
-    q.showTotal = j === "total";
-    const want = j === "total" ? sum : r[j], wantLabel = j === "total" ? "the total" : ctx.label(j);
+    q.ask = j === "all" ? ctx.askTotal() : ctx.askPart(j);
+    q.answer = j === "all" ? T : shares[j];
+    q.knownLine = `Extra legs: ${r[p]} − ${r[qq]} = ${legs(dParts)} = ${fmt(d)}`;
+    q.oneLeg = `1 leg = ${fmt(d)} ÷ ${dParts} = ${fmt(m)}`;
+    q.finalLine = j === "all" ? totalLine() : partLine(j);
+    const want = j === "all" ? sum : r[j], wantLabel = j === "all" ? "all of it" : lab(j);
     q.mistakes = [
-      [d / sum * want, `It looks like ${fmt(d)} went in the Total column. "More than" means it is the difference, so it goes in the Difference column.`],
-      [d / r[p] * want, `It looks like ${fmt(d)} went in the ${cols[p]} column. ${fmt(d)} is how many MORE, so it goes in the Difference column.`],
-      [m, `${fmt(m)} is one part (the multiplier). Now multiply it by ${want} for ${wantLabel}.`],
-      [d, `${fmt(d)} is the difference. The question asks for ${wantLabel}.`],
-      [d * want, `You multiplied ${fmt(d)} by ${want}. First divide ${fmt(d)} by the difference in the ratio, ${dParts}.`]
+      [d / sum * want, `It looks like ${fmt(d)} was shared between ALL the legs. "More than" means ${fmt(d)} is only the EXTRA legs: ${r[p]} − ${r[qq]} = ${legs(dParts)}.`],
+      [d / r[p] * want, `It looks like ${fmt(d)} was shared between all of ${ctx.labelPoss(p)} legs. ${fmt(d)} is just the EXTRA legs: ${r[p]} − ${r[qq]} = ${legs(dParts)}.`],
+      [m, `${fmt(m)} is what 1 leg is worth. Now count the legs for ${wantLabel}: ${want}.`],
+      [d, `${fmt(d)} is the extra amount. The question asks for ${wantLabel}.`],
+      [d * want, `You multiplied ${fmt(d)} by ${want}. First share ${fmt(d)} between the ${legs(dParts)} that are extra.`]
     ];
-    if (j !== "total") q.mistakes.push([T, `${fmt(T)} is the total. The question asks for ${wantLabel} only.`]);
-    q.steps = [`Difference in the ratio: ${r[p]} − ${r[qq]} = ${dParts}`, `${fmt(d)} is the difference. It goes in the Difference column.`, `Multiplier: ${num(d)} ÷ ${dParts} = ${num(m)}`,
-      j === "total" ? `Total parts: ${r.join(" + ")} = ${sum}, so the total is ${sum} × ${num(m)} = ${fmt(T)}` : `${cols[j]}: ${r[j]} × ${num(m)} = ${fmt(q.answer)}`];
-    q.dValue = d;
+    if (j !== "all") q.mistakes.push([T, `${fmt(T)} is all the legs. The question asks for ${wantLabel} only.`]);
   }
+  q.steps = [q.legsLine, q.knownLine, q.oneLeg, q.finalLine];
   q.mistakes = q.mistakes.filter(([v]) => !near(v, q.answer));
   return q;
 }
@@ -325,49 +336,89 @@ function newRound(level){
 }
 function resetQ(){ S.tries = 0; S.help = 0; S.done = false; S.msg = null; S.value = ""; }
 
-/* ---------------- ratio table ---------------- */
-function tableHTML(q, stage){
-  // stage 1: headers + ratio row; 2: known value placed; 3: multiplier; 4: everything
-  const n = q.r.length, headers = [...q.cols, q.extra];
-  const ratio = [...q.r, q.extraRatio];
-  const amounts = [...q.shares, q.kind === "diff" ? q.dValue : q.T];
-  const knownIdx = q.k === "extra" ? n : q.k;
-  const askIdx = q.j === "extra" ? n : q.j === "total" ? -1 : q.j;
-  if (q.showTotal) { headers.push("Total"); ratio.push(q.sum); amounts.push(q.T); }
-  const askCol = q.j === "total" ? headers.length - 1 : askIdx;
-  const cells = amounts.map((v, i) => {
-    if (stage >= 4) return `<td class="${i === knownIdx ? "known" : i === askCol ? "ask" : ""}">${esc(num(v))}</td>`;
-    if (i === knownIdx && stage >= 2) return `<td class="known">${esc(num(v))}</td>`;
-    if (i === askCol) return `<td class="ask">?</td>`;
-    return `<td></td>`;
+/* ---------------- spider ---------------- */
+// stage 1: body and legs; 2: the number you know; 3: what 1 leg is worth on every leg; 4: everything
+function spiderHTML(q, stage){
+  const n = q.r.length, three = n === 3;
+  const W = 360, cx = 180, cy = 150, rx = 54, ry = 40, L = 36;
+  const H = three ? 360 : 280;
+  const centres = three ? [200, -20, 90] : [180, 0];
+  const maxSpan = three ? 100 : 140;
+  const pre = q.unit.pre || "";
+  const leg1 = pre + num(q.m);
+  const amt = v => pre + num(v);
+  let legsSvg = "", lblSvg = "", nmSvg = "";
+  q.r.forEach((cnt, g) => {
+    const span = cnt > 1 ? Math.min(maxSpan, 20 * (cnt - 1)) : 0;
+    const known = stage >= 2 && (q.k === g || q.k === "all");
+    const ask = q.j === g || q.j === "all";
+    for (let i = 0; i < cnt; i++){
+      const t = (centres[g] - span / 2 + (cnt > 1 ? span * i / (cnt - 1) : 0)) * Math.PI / 180;
+      const c = Math.cos(t), sn = Math.sin(t);
+      const x1 = cx + rx * c, y1 = cy + ry * sn, x2 = x1 + L * c, y2 = y1 + L * sn;
+      const extra = stage >= 2 && q.k === "extra" && g === q.p && i >= q.r[q.qq];
+      const cls = extra ? "extra" : known ? "known" : ask ? "ask" : "";
+      legsSvg += `<line class="leg ${cls}" x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}"/>`;
+      if (stage >= 3){
+        const off = 14 + (three && g === 2 && i % 2 ? 16 : 0);
+        const lx = x2 + off * c, ly = y2 + off * sn + 5;
+        const anchor = c < -0.3 ? "end" : c > 0.3 ? "start" : "middle";
+        lblSvg += `<text class="lbl ${extra ? "extra-t" : ""}" x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anchor}">${esc(leg1)}</text>`;
+      }
+    }
+    // name and amount, above each side like her drawings (third person goes underneath)
+    const nx = g === 0 ? cx - 115 : g === 1 ? cx + 115 : cx;
+    const ny = g === 2 ? H - 44 : 24;
+    nmSvg += `<text class="nm" x="${nx}" y="${ny}" text-anchor="middle">${esc(q.cols[g])}</text>`;
+    let a = "";
+    if (q.k === g && stage >= 2){
+      const tx = amt(q.shares[g]), w = tx.length * 12 + 18;
+      a = `<rect class="pill" x="${nx - w / 2}" y="${ny + 8}" width="${w}" height="26" rx="13"/><text class="amt pill-t" x="${nx}" y="${ny + 27}" text-anchor="middle">${esc(tx)}</text>`;
+    } else if (q.j === g){
+      a = `<text class="amt ask" x="${nx}" y="${ny + 27}" text-anchor="middle">${stage >= 4 ? esc(amt(q.shares[g])) : "?"}</text>`;
+    }
+    nmSvg += a;
   });
-  return `<div class="rtwrap"><div class="rt"><table>
-    <thead><tr>${headers.map(h => `<th>${esc(h)}</th>`).join("")}</tr></thead>
-    <tbody><tr>${ratio.map(v => `<td>${v}</td>`).join("")}</tr><tr>${cells.join("")}</tr></tbody></table>
-    ${stage >= 3 ? `<span class="mult">× ${esc(num(q.m))}</span>` : ""}</div></div>`;
+  // the body: shows ALL of it, or the EXTRA amount
+  let bodyTxt = "";
+  if (q.k === "all" || q.j === "all"){
+    const show = q.k === "all" ? stage >= 2 : stage >= 4;
+    bodyTxt = `<text class="lbl" x="${cx}" y="${cy - 6}" text-anchor="middle">All</text><text class="amt ${q.k === "all" ? "" : "ask"}" x="${cx}" y="${cy + 16}" text-anchor="middle">${show ? esc(amt(q.T)) : "?"}</text>`;
+  }
+  if (q.k === "extra" && stage >= 2 && q.j !== "all"){
+    bodyTxt = `<text class="lbl extra-t" x="${cx}" y="${cy - 6}" text-anchor="middle">Extra</text><text class="amt" x="${cx}" y="${cy + 16}" text-anchor="middle">${esc(amt(q.dValue))}</text>`;
+  }
+  const extraNote = q.k === "extra" && stage >= 2 && q.j === "all"
+    ? `<text class="lbl extra-t" x="${cx}" y="${H - 8}" text-anchor="middle">Extra legs = ${esc(amt(q.dValue))}</text>` : "";
+  const desc = q.r.map((x, i) => `${q.cols[i]}: ${legs(x)}`).join(", ");
+  return `<svg class="spider" viewBox="0 0 ${W} ${H}" role="img" aria-label="Spider diagram. ${esc(desc)}">
+    ${legsSvg}<ellipse class="bodyshape" cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}"/>${bodyTxt}${lblSvg}${nmSvg}${extraNote}</svg>`;
+}
+function helpLines(q, stage){
+  return `<ol class="caps small">${[q.legsLine, q.knownLine, q.oneLeg].slice(0, stage).map(t => `<li>${esc(t)}</li>`).join("")}</ol>`;
 }
 const HELP_TEXT = [
   "",
-  "Step 1: draw the ratio table. The ratio goes in the top row.",
-  "Step 2: put the number you know in the right column. It is highlighted.",
-  "Step 3: find the multiplier: divide the number you know by the ratio number above it. Then multiply."
+  "Step 1: draw the spider. Give each person one leg for every part of the ratio.",
+  "Step 2: write the number you know. Is it ONE person's legs, ALL the legs, or just the EXTRA legs?",
+  "Step 3: share it out to find what 1 leg is worth. Write it on every leg, then count the legs you need."
 ];
 
 /* ---------------- views ---------------- */
 function bar(){
-  return `<header class="bar"><button class="brand" data-act="home" aria-label="Home"><span class="logo">2:3</span><span>Ratio Table Trainer</span></button>
+  return `<header class="bar"><button class="brand" data-act="home" aria-label="Home"><span class="logo">2:3</span><span>Ratio Spiders</span></button>
     <button class="iconbtn" data-act="speak" aria-label="Read the question aloud" title="Read aloud" ${S.view === "play" ? "" : "hidden"}>
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12"/></svg></button></header>`;
 }
 function homeView(){
   return `${bar()}
   <div style="display:flex;flex-direction:column;gap:8px"><h1>Pick a level</h1>
-  <p class="muted">Ten questions each time, all new. Type your answer and press Check. If you get stuck, press Help me and the ratio table builds one step at a time.</p></div>
+  <p class="muted">Ten questions each time, all new. Type your answer and press Check. If you get stuck, press Help me and the spider is drawn one step at a time.</p></div>
   <div class="levels">${LEVELS.map((l, i) => `<button class="level" data-act="level" data-i="${i}">
     <span class="top"><span class="lvnum">${i + 1}</span><span class="best">${S.best[l.id] != null ? "Best: " + S.best[l.id] + " / " + ROUND * 3 + " stars" : "Not played yet"}</span></span>
     <b>${esc(l.name)}</b><span class="eg">${esc(l.eg)}</span></button>`).join("")}</div>
   <div class="tipcard"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex:none;margin-top:3px"><path d="M9 18h6M10 21h4M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z"/></svg>
-  <p><b>Ask yourself every time:</b> is the number I know ONE person's share, ALL of it, or the DIFFERENCE? That tells you which column it goes in.</p></div>`;
+  <p><b>Ask yourself every time:</b> is the number I know ONE person's legs, ALL the legs, or just the EXTRA legs? That tells you how many legs to share it between.</p></div>`;
 }
 function dots(){
   return `<div class="dots" aria-hidden="true">${S.qs.map((_, i) => `<i class="${i < S.results.length ? "s" + S.results[i] : ""} ${i === S.i ? "now" : ""}"></i>`).join("")}</div>`;
@@ -381,7 +432,7 @@ function playView(){
   <div class="qcard">
     <div class="qhead"><div><span class="eyebrow">${esc(S.level.name)}</span>
       <p class="qtext">${q.lines.map(esc).join(" ")}<span class="ask">${esc(q.ask)}</span></p></div></div>
-    ${S.help > 0 && !solved ? `<div class="help"><p class="small"><b>${esc(HELP_TEXT[S.help])}</b></p>${tableHTML(q, S.help)}
+    ${S.help > 0 && !solved ? `<div class="help"><p class="small"><b>${esc(HELP_TEXT[S.help])}</b></p>${spiderHTML(q, S.help)}${helpLines(q, S.help)}
         ${S.help < 3 ? `<div><button class="btn ghost sm" data-act="help">Next step</button></div>` : ""}</div>` : ""}
     ${!solved ? `<div class="answer"><label class="field" for="ans">${u.pre ? `<span>${esc(u.pre)}</span>` : ""}<input id="ans" inputmode="decimal" autocomplete="off" placeholder="Your answer" aria-label="Your answer" value="${esc(S.value)}">${u.post ? `<span>${esc(u.post)}</span>` : ""}</label></div>
       <div class="keypad" role="group" aria-label="Number keys">
@@ -400,7 +451,7 @@ function feedbackHTML(q){
   return `<div class="feedback ${ok ? "ok" : "no"}" role="status">
     <span class="head">${ok ? (stars === 3 ? "Yes! First time, no help." : "Yes, that's right.") : "The answer is " + esc(q.fmt(q.answer)) + "."}</span>
     ${!ok && m.text ? `<p>${esc(m.text)}</p>` : ""}
-    ${tableHTML(q, 4)}
+    ${spiderHTML(q, 4)}
     <ol class="steps">${q.steps.map(s => `<li>${esc(s)}</li>`).join("")}</ol>
     <div class="row"><button class="btn ${ok ? "good" : "teal"}" data-act="next" id="nextBtn">${S.i + 1 < ROUND ? "Next question" : "See my score"}</button></div>
   </div>`;
@@ -450,7 +501,7 @@ function check(){
   if (S.tries >= 2){
     S.results[S.i] = 0; S.done = true; S.msg = {type:"reveal", text: hit ? hit[1] : ""}; render(); document.getElementById("nextBtn")?.focus(); return;
   }
-  S.msg = {type:"wrong", text: hit ? hit[1] : "Check which column the number you know goes in. Press Help me to see the ratio table."};
+  S.msg = {type:"wrong", text: hit ? hit[1] : "Check which legs the number you know belongs to. Press Help me to see the spider."};
   S.value = ""; render(); shakeInput(); focusInput();
 }
 function shakeInput(){ const f = document.querySelector(".field"); if (f){ f.classList.add("shake"); setTimeout(() => f.classList.remove("shake"), 350); } }
